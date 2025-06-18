@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Планувальник тренувань</title>
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                        url('https://images.unsplash.com/photo-1593079831268-3381b0db4a77?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80') 
+                        no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        h1 {
+            text-align: center;
+            padding: 20px;
+            font-size: 2.5em;
+            font-weight: 800;
+            color: #00f5d4;
+            text-shadow: 0 0 15px #00f5d4, 0 0 25px #48dbfb;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 1em;
+            color: #00f5d4;
+            text-shadow: 0 0 15px #00f5d4, 0 0 25px #48dbfb;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .calendar-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .filter-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            font-size: 1.5em;
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 245, 212, 0.5);
+            position: relative;
+        }
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            background: rgba(0, 245, 212, 0.2);
+            box-shadow: 0 0 25px rgba(0, 245, 212, 0.9);
+            animation: hoverGlow 1.5s infinite;
+        }
+        @keyframes hoverGlow {
+            0% { box-shadow: 0 0 10px rgba(0, 245, 212, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(0, 245, 212, 0.9); }
+            100% { box-shadow: 0 0 10px rgba(0, 245, 212, 0.5); }
+        }
+        .filter-btn.active {
+            background: linear-gradient(45deg, #00f5d4, #48dbfb);
+            box-shadow: 0 0 20px #00f5d4;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 10px #00f5d4; }
+            50% { box-shadow: 0 0 20px #00f5d4; }
+            100% { box-shadow: 0 0 10px #00f5d4; }
+        }
+        .filter-btn i, .filter-btn:not([onclick="showStats()"]) {
+            font-size: 1.8em;
+            text-shadow: 0 0 5px rgba(0, 245, 212, 0.5);
+        }
+        .filter-btn[onclick="showStats()"] {
+            color: #00f5d4;
+            text-shadow: 0 0 15px #00f5d4, 0 0 25px #48dbfb;
+        }
+        .filter-buttons span {
+            font-size: 0.8em;
+            margin-left: 5px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            text-shadow: 0 0 5px rgba(0, 245, 212, 0.5);
+        }
+        #countAll { background: rgba(255, 255, 255, 0.2); }
+        #countSilove { background: rgba(72, 219, 251, 0.3); }
+        #countKardio { background: rgba(0, 255, 127, 0.3); }
+        #countStretching { background: rgba(255, 105, 180, 0.3); }
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .progress-container .filter-btn {
+            margin-left: 20px;
+        }
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            height: 20px;
+            width: 200px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 10px rgba(0, 245, 212, 0.5);
+        }
+        .progress-fill {
+            height: 100%;
+            transition: width 1s ease;
+            background: linear-gradient(45deg, #ff4e4e, #00f5d4);
+        }
+        .progress-icon {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1em;
+            transition: color 0.3s ease;
+        }
+        .progress-text {
+            margin-left: 10px;
+            font-size: 0.9em;
+        }
+        #calendar {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 30px;
+            /* Обновляем стили рамки, чтобы соответствовать profile.html */
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        .fc {
+            font-family: 'Montserrat', sans-serif;
+        }
+        .fc-toolbar-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #00f5d4;
+            text-shadow: 0 0 10px #00f5d4;
+        }
+        .fc-daygrid-day {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+        }
+        .fc-daygrid-day:hover {
+            transform: scale(1.05);
+            background: rgba(0, 245, 212, 0.2);
+            box-shadow: 0 0 10px rgba(0, 245, 212, 0.5);
+        }
+        .fc-day-today {
+            background: rgba(0, 245, 212, 0.4) !important;
+            border: 2px solid #00f5d4 !important;
+            box-shadow: 0 0 15px #00f5d4 !important;
+        }
+        .fc-daygrid-event {
+            border: none;
+            font-size: 1.5em;
+            text-align: center;
+            padding: 5px;
+            border-radius: 5px;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .fc-daygrid-event:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px #00f5d4;
+        }
+        .fc-daygrid-event.event-added {
+            animation: popIn 0.5s ease;
+        }
+        @  @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .event-silove {
+            background: rgba(72, 219, 251, 0.5);
+            border-left: 3px solid #48dbfb;
+            box-shadow: 0 0 10px #48dbfb;
+        }
+        .event-kardio {
+            background: rgba(0, 255, 127, 0.5);
+            border-left: 3px solid #00ff7f;
+            box-shadow: 0 0 10px #00ff7f;
+        }
+        .event-stretching {
+            background: rgba(255, 105, 180, 0.5);
+            border-left: 3px solid #ff69b4;
+            box-shadow: 0 0 10px #ff69b4;
+        }
+        .fc-button {
+            background: linear-gradient(45deg, #00f5d4, #48dbfb) !important;
+            border: none !important;
+            border-radius: 50px !important;
+            padding: 8px 20px !important;
+            font-weight: 600 !important;
+            transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+            box-shadow: 0 0 10px rgba(0, 245, 212, 0.5) !important;
+        }
+        .fc-button:hover {
+            transform: scale(1.05) !important;
+            box-shadow: 0 0 20px rgba(0, 245, 212, 0.8) !important;
+            animation: pulse 1.5s infinite;
+        }
+        .modal, .view-modal, #statsModal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(26, 26, 46, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 245, 212, 0.3);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 0 12px rgba(0, 245, 212, 0.7);
+            z-index: 1000;
+        }
+        .view-modal {
+            width: 550px;
+            max-width: 90%;
+        }
+        #statsModal {
+            width: 550px;
+            max-width: 90%;
+        }
+        .modal h3, .view-modal h3, #statsModal h3 {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #00f5d4;
+            text-shadow: 0 0 10px #00f5d4;
+            margin-bottom: 20px;
+        }
+        .modal textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #00f5d4;
+            background: transparent;
+            color: #fff;
+            font-size: 1em;
+        }
+        .modal textarea::placeholder {
+            color: #A0A0A0;
+            font-style: italic;
+            opacity: 0.7;
+        }
+        .training-type-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        .type-btn {
+            background: none;
+            border: 2px solid #00f5d4;
+            border-radius: 10px;
+            font-size: 1.5em;
+            padding: 10px;
+            cursor: pointer;
+            transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 245, 212, 0.5);
+        }
+        .type-btn:hover {
+            transform: scale(1.2);
+            background: rgba(0, 245, 212, 0.3);
+            box-shadow: 0 0 20px rgba(0, 245, 212, 0.8);
+        }
+        .type-btn.selected {
+            background: #00f5d4;
+            box-shadow: 0 0 15px #00f5d4;
+        }
+        .modal-actions {
+            display: flex;
+            justify-content: space-around;
+        }
+        .modal-actions button {
+            border: none;
+            border-radius: 10px;
+            font-size: 1.5em;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .modal-actions button:active {
+            transform: scale(0.95);
+        }
+        .btn-save {
+            background-color: #00f5d4;
+            color: black;
+        }
+        .btn-cancel {
+            background-color: #ff4e4e;
+            color: white;
+        }
+        .view-modal-content {
+            position: relative;
+        }
+        .training-details {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            color: #E0E0E0;
+            text-shadow: 0 0 5px rgba(0, 245, 212, 0.5);
+            min-height: 80px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .view-modal-actions {
+            display: flex;
+            justify-content: space-around;
+        }
+        .view-modal-actions button {
+            border: none;
+            border-radius: 10px;
+            font-size: 1.5em;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .view-modal-actions button:hover {
+            transform: scale(1.05);
+        }
+        .view-modal-actions button:active {
+            transform: scale(0.95);
+        }
+        .btn-edit {
+            background-color: #ffd166;
+            color: black;
+        }
+        .btn-delete {
+            background-color: #ef476f;
+            color: white;
+        }
+        .btn-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .btn-close:hover {
+            transform: scale(1.2);
+            color: #ff4e4e;
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            z-index: 999;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 245, 212, 0.9);
+            color: #1a1a2e;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            box-shadow: 0 0 15px #00f5d4;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1002;
+        }
+        .toast.show {
+            opacity: 1;
+            animation: fadeInOut 3s ease;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(20px); }
+            10% { opacity: 1; transform: translateY(0); }
+            90% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(20px); }
+        }
+        .stats-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stats-btn {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 245, 212, 0.3);
+            border-radius: 10px;
+            padding: 8px 20px;
+            color: #E0E0E0;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 245, 212, 0.5);
+            position: relative;
+        }
+        .stats-btn:hover {
+            transform: translateY(-2px);
+            background: rgba(0, 245, 212, 0.2);
+            box-shadow: 0 0 15px rgba(0, 245, 212, 0.8);
+        }
+        .stats-btn.active {
+            background: linear-gradient(45deg, #00f5d4, #48dbfb);
+            color: #1a1a2e;
+            box-shadow: 0 0 15px #00f5d4;
+        }
+        .stats-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 8px;
+            background: #00f5d4;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00f5d4;
+        }
+        .stats-btn i {
+            margin-right: 5px;
+        }
+        #statsChart {
+            animation: grow 0.5s ease;
+        }
+        @keyframes grow {
+            0% { transform: scaleY(0); }
+            100% { transform: scaleY(1); }
+        }
+        canvas {
+            position: relative;
+        }
+        @media (max-width: 768px) {
+            #calendar {
+                padding: 15px;
+            }
+            .modal, .view-modal, #statsModal {
+                width: 95%;
+                padding: 20px;
+            }
+            .fc-button {
+                padding: 5px 10px !important;
+                font-size: 0.9em !important;
+            }
+            .filter-btn {
+                padding: 5px 10px;
+                font-size: 1.2em;
+            }
+            .progress-bar {
+                width: 150px;
+            }
+            .stats-btn {
+                padding: 6px 15px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏋️‍♀️ Планувальник тренувань</h1>
+        <p class="subtitle">Складай свій графік та досягай цілей!</p>
+        <div class="calendar-controls">
+            <div class="filter-buttons">
+                <button class="filter-btn active" onclick="filterEvents('all')">Всі <span id="countAll">0</span></button>
+                <button class="filter-btn" onclick="filterEvents('💪')">💪 <span id="countSilove">0</span></button>
+                <button class="filter-btn" onclick="filterEvents('🏃‍♂️')">🏃‍♂️ <span id="countKardio">0</span></button>
+                <button class="filter-btn" onclick="filterEvents('🧘')">🧘 <span id="countStretching">0</span></button>
+            </div>
+            <div class="progress-container">
+                <button class="filter-btn" onclick="showStats()">📊 Статистика</button>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                    <span class="progress-icon" id="progressIcon">🏆</span>
+                </div>
+                <span class="progress-text" id="progressText">Тренувань: 0/12 (0%)</span>
+            </div>
+        </div>
+        <div id='calendar'></div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="toast" id="toast"></div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <h3>Тренування</h3>
+            <textarea id="trainingText" rows="3" placeholder="Наприклад: Силове, Спина + Прес"></textarea>
+            <div class="training-type-buttons">
+                <button class="type-btn selected" onclick="setTrainingType('silove')">💪</button>
+                <button class="type-btn" onclick="setTrainingType('kardio')">🏃‍♂️</button>
+                <button class="type-btn" onclick="setTrainingType('stretching')">🧘</button>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-save" onclick="saveEvent()"><i class="fas fa-check"></i></button>
+                <button class="btn-cancel" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="view-modal" id="viewModal">
+        <div class="modal-content">
+            <button class="btn-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            <h3><span id="trainingIcon"></span> Тренування</h3>
+            <p id="trainingDetails" class="training-details"></p>
+            <div class="view-modal-actions">
+                <button class="btn-edit" title="Редагувати тренування"><i class="fas fa-edit"></i></button>
+                <button class="btn-delete" title="Видалити тренування"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="statsModal">
+        <div class="modal-content">
+            <button class="btn-close" onclick="closeStatsModal()"><i class="fas fa-times"></i></button>
+            <h3>📊 Статистика тренувань</h3>
+            <div class="stats-controls">
+                <button class="stats-btn active" onclick="updateStats('month')"><i class="fas fa-calendar-alt"></i> За місяць</button>
+                <button class="stats-btn" onclick="updateStats('week')"><i class="fas fa-calendar-week"></i> За тиждень</button>
+            </div>
+            <canvas id="statsChart" style="max-height: 300px;"></canvas>
+            <p id="statsSummary" style="text-align: center; margin-top: 10px; color: #E0E0E0;"></p>
+        </div>
+    </div>
+
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let calendar;
+        let selectedDate;
+        let selectedEvent;
+        let selectedType = 'silove';
+        let statsChart;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const calendarEl = document.getElementById('calendar');
+
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'uk',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'month,week'
+                },
+                dateClick: function (info) {
+                    selectedDate = info.dateStr;
+                    document.getElementById('overlay').style.display = 'block';
+                    document.getElementById('modal').style.display = 'block';
+                },
+                eventClick: function(info) {
+                    selectedEvent = info.event;
+                    const trainingText = selectedEvent.extendedProps?.text || 'Текст тренування відсутній';
+                    const trainingType = selectedEvent.title || '';
+                    document.getElementById('trainingDetails').textContent = trainingText;
+                    document.getElementById('trainingIcon').textContent = trainingType + ' ';
+                    document.getElementById('viewModal').style.display = 'block';
+                    document.getElementById('overlay').style.display = 'block';
+
+                    const editButton = document.querySelector('#viewModal .btn-edit');
+                    const deleteButton = document.querySelector('#viewModal .btn-delete');
+                    editButton.replaceWith(editButton.cloneNode(true));
+                    deleteButton.replaceWith(deleteButton.cloneNode(true));
+                    document.querySelector('#viewModal .btn-edit').addEventListener('click', editEvent);
+                    document.querySelector('#viewModal .btn-delete').addEventListener('click', deleteEvent);
+                },
+                eventClassNames: function(arg) {
+                    if (arg.event.title === '💪') return 'event-silove';
+                    if (arg.event.title === '🏃‍♂️') return 'event-kardio';
+                    if (arg.event.title === '🧘') return 'event-stretching';
+                    return 'event-added';
+                },
+                events: JSON.parse(localStorage.getItem('events')) || []
+            });
+
+            calendar.render();
+            updateProgress();
+        });
+
+        function setTrainingType(type) {
+            selectedType = type;
+            document.querySelectorAll('.type-btn').forEach(btn => {
+                btn.classList.remove('selected');
+                const btnType = btn.textContent === '💪' ? 'silove' : 
+                                btn.textContent === '🏃‍♂️' ? 'kardio' : 
+                                btn.textContent === '🧘' ? 'stretching' : '';
+                if (btnType === selectedType) {
+                    btn.classList.add('selected');
+                }
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+        }
+
+        function saveEvent() {
+            const text = document.getElementById('trainingText').value;
+            let icon = '';
+            if (selectedType === 'silove') icon = '💪';
+            else if (selectedType === 'kardio') icon = '🏃‍♂️';
+            else if (selectedType === 'stretching') icon = '🧘';
+
+            const event = {
+                title: icon,
+                extendedProps: { text },
+                start: selectedDate,
+                classNames: ['event-added']
+            };
+
+            if (selectedEvent) {
+                selectedEvent.setProp('title', icon);
+                selectedEvent.setExtendedProp('text', text);
+                selectedEvent.setStart(selectedDate);
+                showToast('Тренування оновлено ✅');
+            } else {
+                calendar.addEvent(event);
+                showToast('Тренування додано ✅');
+            }
+
+            const events = calendar.getEvents().map(e => ({
+                title: e.title,
+                extendedProps: e.extendedProps,
+                start: e.startStr
+            }));
+            localStorage.setItem('events', JSON.stringify(events));
+
+            closeModal();
+            updateProgress();
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('viewModal').style.display = 'none';
+            document.getElementById('trainingText').value = '';
+            selectedEvent = null;
+        }
+
+        function deleteEvent() {
+            if (selectedEvent) {
+                selectedEvent.remove();
+                const events = calendar.getEvents().map(e => ({
+                    title: e.title,
+                    extendedProps: e.extendedProps,
+                    start: e.startStr
+                }));
+                localStorage.setItem('events', JSON.stringify(events));
+                showToast('Тренування видалено 🗑️');
+                closeModal();
+                updateProgress();
+            }
+        }
+
+        function editEvent() {
+            if (!selectedEvent) return;
+            const oldText = selectedEvent.extendedProps?.text || '';
+            const oldType = selectedEvent.title || '';
+            selectedDate = selectedEvent.startStr || '';
+            document.getElementById('trainingText').value = oldText;
+            if (oldType === '💪') setTrainingType('silove');
+            else if (oldType === '🏃‍♂️') setTrainingType('kardio');
+            else setTrainingType('stretching');
+            document.getElementById('modal').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('viewModal').style.display = 'none';
+        }
+
+        function filterEvents(type) {
+            calendar.getEvents().forEach(event => {
+                if (type === 'all' || event.title === type) {
+                    event.setProp('display', 'auto');
+                } else {
+                    event.setProp('display', 'none');
+                }
+            });
+
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.includes(type === 'all' ? 'Всі' : type)) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        function updateStats(period) {
+            const events = calendar.getEvents();
+            let filteredEvents = events;
+
+            const today = new Date();
+            if (period === 'week') {
+                const weekStart = new Date(today);
+                weekStart.setDate(today.getDate() - today.getDay());
+                const weekEnd = new Date(today);
+                weekEnd.setDate(weekStart.getDate() + 6);
+                filteredEvents = events.filter(event => {
+                    const eventDate = new Date(event.startStr);
+                    return eventDate >= weekStart && eventDate <= weekEnd;
+                });
+            }
+
+            const siloveCount = filteredEvents.filter(event => event.title === '💪').length;
+            const kardioCount = filteredEvents.filter(event => event.title === '🏃‍♂️').length;
+            const stretchingCount = filteredEvents.filter(event => event.title === '🧘').length;
+            const total = siloveCount + kardioCount + stretchingCount;
+            const totalDays = period === 'week' ? 7 : 30;
+            const avgTrainings = (total / totalDays).toFixed(2);
+            const completionPercent = ((total / (period === 'week' ? 3 : 12)) * 100).toFixed(0);
+
+            if (statsChart) statsChart.destroy();
+            const ctx = document.getElementById('statsChart').getContext('2d');
+            statsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Силові 💪', 'Кардіо 🏃‍♂️', 'Розтяжка 🧘'],
+                    datasets: [{
+                        label: 'Кількість тренувань',
+                        data: [siloveCount, kardioCount, stretchingCount],
+                        backgroundColor: [
+                            'rgba(72, 219, 251, 0.5)',
+                            'rgba(0, 255, 127, 0.5)',
+                            'rgba(255, 105, 180, 0.5)'
+                        ],
+                        borderColor: [
+                            '#48dbfb',
+                            '#00ff7f',
+                            '#ff69b4'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#E0E0E0' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: '#E0E0E0' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#E0E0E0' } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            document.getElementById('statsSummary').textContent = 
+                `Середня кількість тренувань: ${avgTrainings} на ${period === 'week' ? 'тиждень' : 'місяць'}. Виконання плану: ${completionPercent}%!`;
+
+            document.querySelectorAll('.stats-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.includes(period === 'month' ? 'За місяць' : 'За тиждень')) {
+                    btn.classList.add('active');
+                }
+            });
+
+            showToast(`Ви на ${completionPercent}% до цілі! Продовжуйте так! 💪`);
+        }
+
+        function showStats() {
+            document.getElementById('statsModal').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+            updateStats('month');
+        }
+
+        function closeStatsModal() {
+            document.getElementById('statsModal').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+            if (statsChart) statsChart.destroy();
+        }
+
+        function updateProgress() {
+            const events = calendar.getEvents();
+            const uniqueDays = new Set(events.map(event => event.startStr.split('T')[0])).size;
+            const totalDays = 12;
+            const progressPercent = (uniqueDays / totalDays) * 100;
+            const progressFill = document.getElementById('progressFill');
+            const progressIcon = document.getElementById('progressIcon');
+
+            progressFill.style.width = `${progressPercent}%`;
+            document.getElementById('progressText').textContent = `Тренувань: ${uniqueDays}/${totalDays} (${Math.round(progressPercent)}%)`;
+
+            if (uniqueDays >= totalDays) {
+                progressIcon.style.color = '#ffd166';
+            } else {
+                progressIcon.style.color = '#A0A0A0';
+            }
+
+            const siloveCount = events.filter(event => event.title === '💪').length;
+            const kardioCount = events.filter(event => event.title === '🏃‍♂️').length;
+            const stretchingCount = events.filter(event => event.title === '🧘').length;
+            document.getElementById('countAll').textContent = events.length;
+            document.getElementById('countSilove').textContent = siloveCount;
+            document.getElementById('countKardio').textContent = kardioCount;
+            document.getElementById('countStretching').textContent = stretchingCount;
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93013725b82844d9',t:'MTc0NDYxMjg2NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

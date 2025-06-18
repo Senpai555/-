@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ШІ-Тренер - Панель керування</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        :root {
+            --text-color: #fff;
+            --accent-color: #E4B062;
+            --planning-bg: linear-gradient(135deg, #feca57, #ff8c00);
+            --analysis-bg: linear-gradient(135deg, #ff6b6b, #ff3b3b);
+            --advice-bg: linear-gradient(135deg, #34c759, #28a745);
+            --highlight-bg: linear-gradient(135deg, #00f0ff, #ff00ff);
+            --neon-glow: #00f0ff;
+        }
+        body {
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1593079831268-3381b0db4a77?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: auto;
+        }
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            max-width: 800px;
+            width: 90%;
+            text-align: center;
+            z-index: 1;
+            margin: 20px 0;
+        }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: #fff;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+        .welcome-text {
+            font-size: 1.3rem;
+            font-weight: 300;
+            margin-bottom: 15px;
+            color: #fff;
+            opacity: 0.9;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+        .welcome-text i {
+            margin-right: 8px;
+            color: var(--accent-color);
+            transition: transform 0.3s ease;
+        }
+        .welcome-text i:hover {
+            transform: scale(1.2);
+        }
+        .slogan {
+            font-size: 1.2rem;
+            font-weight: 300;
+            color: #fff;
+            margin-bottom: 30px;
+            opacity: 0.8;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #fff;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            opacity: 0.9;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+        .btn {
+            border: none;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            color: #fff;
+            transition: all 0.3s ease;
+            position: relative;
+            margin: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            will-change: opacity, transform;
+        }
+        .btn-planning {
+            background: var(--planning-bg);
+        }
+        .btn-analysis {
+            background: var(--analysis-bg);
+        }
+        .btn-advice {
+            background: var(--advice-bg);
+        }
+        .btn-highlight {
+            background: var(--highlight-bg);
+            font-size: 1.3rem;
+            padding: 16px 32px;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 30px var(--neon-glow);
+            z-index: 2;
+        }
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+        .btn i {
+            margin-right: 8px;
+            transition: transform 0.3s ease;
+        }
+        .btn:hover i {
+            transform: scale(1.2);
+        }
+        .btn::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            border-radius: 50px;
+            background: rgba(255, 255, 250, 0.2);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .btn:hover::after {
+            opacity: 1;
+        }
+        .btn-planning, .btn-analysis, .btn-advice, .btn-highlight {
+            animation: smoothFadeIn 1.2s ease-in-out forwards;
+        }
+        .btn-planning:nth-child(1) { animation-delay: 0.2s; }
+        .btn-planning:nth-child(2) { animation-delay: 0.3s; }
+        .btn-analysis:nth-child(1) { animation-delay: 0.4s; }
+        .btn-analysis:nth-child(2) { animation-delay: 0.5s; }
+        .btn-analysis:nth-child(3) { animation-delay: 0.6s; }
+        .btn-advice:nth-child(1) { animation-delay: 0.8s; }
+        .btn-advice:nth-child(2) { animation-delay: 0.9s; }
+        .btn-advice:nth-child(3) { animation-delay: 1.0s; }
+        .btn-advice:nth-child(4) { animation-delay: 1.1s; }
+        .btn-advice:nth-child(5) { animation-delay: 1.2s; }
+        .btn-highlight { animation-delay: 0.1s; }
+        .btn-logout {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid #fff;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 40px;
+            animation: fadeIn 1.5s ease-in-out forwards;
+            z-index: 2;
+            position: relative;
+        }
+        .btn-logout:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .btn-logout i {
+            margin-right: 8px;
+        }
+        .btn {
+            position: relative;
+        }
+        .btn:hover::before {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            z-index: 10;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                max-width: 100%;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            .welcome-text {
+                font-size: 1.1rem;
+            }
+            .slogan {
+                font-size: 1rem;
+            }
+            .section-title {
+                font-size: 1.2rem;
+            }
+            .btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+            .btn-highlight {
+                font-size: 1.1rem;
+                padding: 12px 24px;
+            }
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        @keyframes smoothFadeIn {
+            0% { 
+                opacity: 0; 
+                transform: scale(0.95);
+            }
+            100% { 
+                opacity: 1; 
+                transform: scale(1);
+            }
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 10px var(--neon-glow); }
+            50% { box-shadow: 0 0 30px var(--neon-glow); }
+            100% { box-shadow: 0 0 10px var(--neon-glow); }
+        }
+    </style>
+</head>
+<body>
+    <div id="particles-js"></div>
+    <div class="container">
+        <p class="welcome-text"><i class="fas fa-dumbbell"></i>Готовий до змін? Почни з ШІ-Тренером і досягни своїх фітнес-цілей разом із новими технологіями!</p>
+        <h1>Панель керування</h1>
+        <p class="slogan">Твій шлях до кращої версії себе починається тут!</p>
+
+        <div class="row">
+            <div class="col-12">
+                <a href="{{ url_for('ai_chat') }}" class="btn btn-highlight" data-tooltip="Спілкуйся з ШІ-тренером!"><i class="fas fa-robot"></i>Чат з ШІ-тренером</a>
+            </div>
+        </div>
+
+        <h2 class="section-title">Планування</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <a href="{{ url_for('training_planner') }}" class="btn btn-planning" data-tooltip="Створи план тренувань"><i class="fas fa-calendar-alt"></i>Планувальник тренувань</a>
+            </div>
+            <div class="col-md-6">
+                <a href="{{ url_for('training_programs') }}" class="btn btn-planning" data-tooltip="Обери готову програму"><i class="fas fa-dumbbell"></i>Програми тренувань</a>
+            </div>
+        </div>
+
+        <h2 class="section-title">Аналіз</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <a href="{{ url_for('progress_forecast') }}" class="btn btn-analysis" data-tooltip="Прогнозуй свій прогрес"><i class="fas fa-chart-line"></i>Прогноз прогресу</a>
+            </div>
+            <div class="col-md-6">
+                <a href="{{ url_for('fitness_test') }}" class="btn btn-analysis" data-tooltip="Оціни свій рівень"><i class="fas fa-heartbeat"></i>Тест на рівень підготовки</a>
+            </div>
+            <div class="col-md-12 text-center mt-3">
+                <a href="{{ url_for('muscle_map') }}" class="btn btn-analysis" data-tooltip="Дізнайся про м’язи"><i class="fas fa-male"></i>Карта м’язів</a>
+            </div>
+        </div>
+
+        <h2 class="section-title">Поради</h2>
+        <div class="row">
+            <div class="col-md-6">
+                <a href="{{ url_for('bju_calculator') }}" class="btn btn-advice" data-tooltip="Розрахуй БЖУ"><i class="fas fa-calculator"></i>Калькулятор БЖУ</a>
+            </div>
+            <div class="col-md-6">
+                <a href="{{ url_for('nutrition_recommendations') }}" class="btn btn-advice" data-tooltip="Отримай поради з харчування"><i class="fas fa-apple-alt"></i>Рекомендації по харчуванню</a>
+            </div>
+            <div class="col-md-6">
+                <a href="{{ url_for('warmup_trainer') }}" class="btn btn-advice" data-tooltip="Розімнись перед тренуванням"><i class="fas fa-fire"></i>Розминка перед тренуванням</a>
+            </div>
+            <div class="col-md-6">
+                <a href="{{ url_for('recovery_plan') }}" class="btn btn-advice" data-tooltip="Склади план відновлення"><i class="fas fa-bed"></i>План відновлення</a>
+            </div>
+            <div class="col-md-6">
+                <a href="{{ url_for('virtual_run') }}" class="btn btn-advice" data-tooltip="Побігай віртуально"><i class="fas fa-shoe-prints"></i>Віртуальна пробіжка</a>
+            </div>
+            <div class="col-md-6">
+                <a href="{{ url_for('guides') }}" class="btn btn-advice" data-tooltip="Дізнайся корисні поради"><i class="fas fa-book"></i>Гайди</a>
+            </div>
+        </div>
+
+        <a href="{{ url_for('logout') }}" class="btn btn-logout" data-tooltip="Вийти з акаунта"><i class="fas fa-sign-out-alt"></i>Вийти</a>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script>
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: '#00f0ff' },
+                shape: { type: 'circle' },
+                opacity: { value: 0.5, random: true },
+                size: { value: 3, random: true },
+                line_linked: { enable: true, distance: 150, color: '#00f0ff', opacity: 0.4, width: 1 },
+                move: { enable: true, speed: 2, direction: 'none', random: false, straight: false, out_mode: 'out', bounce: false }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' }, resize: true },
+                modes: { repulse: { distance: 100, duration: 0.4 }, push: { particles_nb: 4 } }
+            },
+            retina_detect: true
+        });
+    </script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init();
+    </script>
+</body>
+</html>

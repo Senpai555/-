@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Гайди</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        :root {
+            --text-color: #fff;
+            --accent-color: #E4B062;
+            --training-bg: linear-gradient(135deg, #34c759, #28a745);
+            --nutrition-bg: linear-gradient(135deg, #ff6b6b, #ff3b3b);
+            --recovery-bg: linear-gradient(135deg, #6b48ff, #9d4edd);
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --card-border: rgba(255, 255, 255, 0.2);
+            --neon-glow: #00f0ff;
+            --hover-glow: rgba(0, 240, 255, 0.5);
+        }
+        body {
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1593079831268-3381b0db4a77?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--card-border);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            max-width: 1200px;
+            width: 90%;
+            margin: 20px auto;
+            z-index: 1;
+            flex: 1;
+            position: relative;
+        }
+        .decoration {
+            position: absolute;
+            font-size: 3rem;
+            color: rgba(255, 255, 255, 0.1);
+            opacity: 0.3;
+        }
+        .decoration-1 { top: 20px; left: 20px; }
+        .decoration-2 { bottom: 20px; right: 20px; }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--accent-color);
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px var(--neon-glow);
+            animation: fadeInUp 1s ease-out;
+        }
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .filter-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: var(--text-color);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--training-bg);
+            box-shadow: 0 0 15px var(--hover-glow);
+            transform: scale(1.05);
+            backface-visibility: hidden;
+        }
+        .guide-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.8s ease-out;
+            display: flex;
+            align-items: center;
+        }
+        .guide-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px var(--hover-glow);
+        }
+        .guide-card h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+        .guide-card p {
+            font-size: 0.95rem;
+            color: #ddd;
+            margin-bottom: 15px;
+            flex-grow: 1;
+        }
+        .guide-icon {
+            font-size: 2rem;
+            margin-right: 15px;
+            color: var(--accent-color);
+            transition: transform 0.3s ease;
+        }
+        .guide-card:hover .guide-icon {
+            transform: rotate(360deg);
+        }
+        .read-btn {
+            background: var(--training-bg);
+            border: none;
+            padding: 8px 20px;
+            border-radius: 20px;
+            color: var(--text-color);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .read-btn:hover {
+            box-shadow: 0 0 15px var(--neon-glow);
+            transform: scale(1.05);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            animation: fadeIn 0.5s ease-out;
+        }
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5rem;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .close-modal:hover {
+            color: var(--accent-color);
+        }
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .filter-buttons { flex-wrap: wrap; }
+            .filter-btn { padding: 8px 15px; font-size: 0.9rem; }
+            .guide-card { padding: 15px; flex-direction: column; text-align: center; }
+            .guide-icon { margin-right: 0; margin-bottom: 10px; }
+            .guide-card h3 { font-size: 1.1rem; }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div id="particles-js"></div>
+    <div class="container">
+        <i class="fas fa-dumbbell decoration decoration-1"></i>
+        <i class="fas fa-heartbeat decoration decoration-2"></i>
+        <h1>Гайди</h1>
+        <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">Всі</button>
+            <button class="filter-btn" data-filter="training">Тренування</button>
+            <button class="filter-btn" data-filter="nutrition">Харчування</button>
+            <button class="filter-btn" data-filter="recovery">Відновлення</button>
+        </div>
+        <div class="guide-list">
+            <div class="guide-card" data-category="training" data-content-file="{{ url_for('static', filename='masy.txt') }}" style="background: var(--training-bg);">
+                <i class="fas fa-dumbbell guide-icon"></i>
+                <div>
+                    <h3>Гайд із набору маси</h3>
+                    <p>Дізнайтесь, як ефективно набрати м'язову масу.</p>
+                    <button class="read-btn" onclick="openGuide('Гайд із набору маси', this.parentElement.parentElement.getAttribute('data-content-file'))">Читати</button>
+                </div>
+            </div>
+            <div class="guide-card" data-category="training" data-content-file="{{ url_for('static', filename='rekonpozitsiya.txt') }}" style="background: var(--training-bg);">
+                <i class="fas fa-balance-scale guide-icon"></i>
+                <div>
+                    <h3>Гайд із рекомпозиції</h3>
+                    <p>Оптимізуйте співвідношення м’язів і жиру.</p>
+                    <button class="read-btn" onclick="openGuide('Гайд із рекомпозиції', this.parentElement.parentElement.getAttribute('data-content-file'))">Читати</button>
+                </div>
+            </div>
+            <div class="guide-card" data-category="training" data-content-file="{{ url_for('static', filename='progres.txt') }}" style="background: var(--training-bg);">
+                <i class="fas fa-chart-line guide-icon"></i>
+                <div>
+                    <h3>Прогрес — це не нудно</h3>
+                    <p>Стежте за своїм прогресом із легкістю.</p>
+                    <button class="read-btn" onclick="openGuide('Прогрес — це не нудно', this.parentElement.parentElement.getAttribute('data-content-file'))">Читати</button>
+                </div>
+            </div>
+            <div class="guide-card" data-category="recovery" data-content-file="{{ url_for('static', filename='unikayemo_travm.txt') }}" style="background: var(--recovery-bg);">
+                <i class="fas fa-band-aid guide-icon"></i>
+                <div>
+                    <h3>Уникаємо травм</h3>
+                    <p>Як уникнути травм під час тренувань.</p>
+                    <button class="read-btn" onclick="openGuide('Уникаємо травм', this.parentElement.parentElement.getAttribute('data-content-file'))">Читати</button>
+                </div>
+            </div>
+            <div class="guide-card" data-category="nutrition" data-content-file="{{ url_for('static', filename='sportyvne_harchuvannya.txt') }}" style="background: var(--nutrition-bg);">
+                <i class="fas fa-utensils guide-icon"></i>
+                <div>
+                    <h3>Спортивне харчування</h3>
+                    <p>Поради щодо харчування для спортсменів.</p>
+                    <button class="read-btn" onclick="openGuide('Спортивне харчування', this.parentElement.parentElement.getAttribute('data-content-file'))">Читати</button>
+                </div>
+            </div>
+            <div class="guide-card" data-category="nutrition" data-content-file="{{ url_for('static', filename='pdkraschennya_travlennya.txt') }}" style="background: var(--nutrition-bg);">
+                <i class="fas fa-leaf guide-icon"></i>
+                <div>
+                    <h3>Гайд із покращення травлення</h3>
+                    <p>Покращуйте своє травлення природним шляхом.</p>
+                    <button class="read-btn" onclick="openGuide('Гайд із покращення травлення', this.parentElement.parentElement.getAttribute('data-content-file'))">Читати</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">×</span>
+            <h3 id="modal-title"></h3>
+            <p id="modal-content"></p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script>
+        particlesJS('particles-js', {
+            particles: { number: { value: 80, density: { enable: true, value_area: 800 } }, color: { value: '#00f0ff' }, shape: { type: 'circle' }, opacity: { value: 0.5, random: true }, size: { value: 3, random: true }, line_linked: { enable: true, distance: 150, color: '#00f0ff', opacity: 0.4, width: 1 }, move: { enable: true, speed: 2, direction: 'none', random: false, straight: false, out_mode: 'out', bounce: false } },
+            interactivity: { detect_on: 'canvas', events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' }, resize: true }, modes: { repulse: { distance: 100, duration: 0.4 }, push: { particles_nb: 4 } } },
+            retina_detect: true
+        });
+
+        async function openGuide(title, filePath) {
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalContent = document.getElementById('modal-content');
+            modalTitle.textContent = title;
+
+            try {
+                const response = await fetch(filePath);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const text = await response.text();
+                if (!text.trim()) {
+                    throw new Error('File is empty or contains no readable content');
+                }
+                modalContent.textContent = text;
+            } catch (error) {
+                modalContent.textContent = `Помилка завантаження гайду: ${error.message}`;
+                console.error('Fetch error for', filePath, ':', error);
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+        }
+
+        document.querySelectorAll('.filter-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                const filter = button.getAttribute('data-filter');
+                document.querySelectorAll('.guide-card').forEach(card => {
+                    if (filter === 'all' || card.getAttribute('data-category') === filter) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('modal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    </script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({ duration: 800 });
+    </script>
+</body>
+</html>

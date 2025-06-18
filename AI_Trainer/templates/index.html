@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-i18n="title">ШІ-Тренер - Вхід</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --background-color: #f4f4f9;
+            --text-color: #fff;
+            --accent-color: #E4B062;
+            --button-bg: #ff6b6b;
+            --button-secondary-bg: #6c757d;
+            --google-btn-bg: #4285F4;
+        }
+        body {
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1593079831268-3381b0db4a77?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-color);
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            text-align: center;
+            animation: scaleUp 0.5s ease-in-out;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.1s ease;
+        }
+        .container.loaded {
+            opacity: 1;
+        }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+        }
+        h1 i {
+            color: var(--accent-color);
+            margin-right: 10px;
+            animation: pulse 2s infinite;
+        }
+        p {
+            font-size: 1.2rem;
+            font-weight: 400;
+            margin-bottom: 30px;
+            color: var(--text-color);
+            opacity: 0.9;
+        }
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .btn-register, .btn-login, .btn-google {
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 12px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+        }
+        .btn-register {
+            background: var(--button-bg);
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+        .btn-register:hover {
+            background: #ff8787;
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.6);
+        }
+        .btn-login {
+            background: var(--button-secondary-bg);
+            color: white;
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+        }
+        .btn-login:hover {
+            background: #5a6268;
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(108, 117, 125, 0.6);
+        }
+        .btn-google {
+            background: var(--google-btn-bg);
+            color: white;
+            box-shadow: 0 5px 15px rgba(66, 133, 244, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-google:hover {
+            background: #3267D6;
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(66, 133, 244, 0.6);
+        }
+        /* Форма входа */
+        .login-form {
+            display: none;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        .login-form.active {
+            display: block;
+            animation: slideIn 0.5s ease-in-out;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .form-group label {
+            font-size: 0.9rem;
+            font-weight: 400;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--accent-color);
+            border-radius: 5px;
+            background: transparent;
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--button-bg);
+            box-shadow: 0 0 5px rgba(255, 107, 107, 0.4);
+        }
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .error-message {
+            color: #ff6b6b;
+            font-size: 0.8rem;
+            margin-top: 5px;
+            display: none;
+        }
+        .btn-submit {
+            background: var(--button-bg);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 10px;
+            border: none;
+            border-radius: 50px;
+            width: 100%;
+            transition: background 0.3s ease;
+        }
+        .btn-submit:hover {
+            background: #ff8787;
+        }
+        /* Иконка с подписью */
+        .feature-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            font-weight: 400;
+        }
+        .feature-icon i {
+            color: var(--accent-color);
+            margin-right: 10px;
+            font-size: 1.2rem;
+            animation: pulse 2s infinite;
+        }
+        /* Переключатель языка */
+        .language-switcher {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+        .language-switcher button {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .language-switcher button:hover {
+            transform: scale(1.2);
+        }
+        /* Анимации */
+        @keyframes scaleUp {
+            0% { opacity: 0; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        @keyframes slideIn {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px;
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            p {
+                font-size: 1rem;
+            }
+            .btn-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .btn-register, .btn-login, .btn-google {
+                width: 100%;
+                padding: 10px;
+            }
+        }
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            p {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Переключатель языка -->
+    <div class="language-switcher">
+        <button data-lang="ua" onclick="setLanguage('ua')">🇺🇦</button>
+        <button data-lang="en" onclick="setLanguage('en')">🇬🇧</button>
+        <button data-lang="pl" onclick="setLanguage('pl')">🇵🇱</button>
+    </div>
+
+    <div class="container">
+        <h1><i class="fas fa-dumbbell"></i> <span data-i18n="welcome">Ласкаво просимо до ШІ-Тренер!</span></h1>
+        <p data-i18n="subtitle">Ваш персональний помічник для створення ідеального плану тренувань.</p>
+        <div class="btn-group">
+            <a href="{{ url_for('register') }}" class="btn-register" data-i18n="register">Реєстрація</a>
+            <a href="#" class="btn-login" onclick="showLoginForm()" data-i18n="login">Вхід</a>
+        </div>
+        <a href="{{ url_for('login_google') }}" class="btn-google">
+            <i class="fab fa-google"></i> <span data-i18n="google_login">Увійти через Google</span>
+        </a>
+        <form class="login-form" id="loginForm" method="POST" action="{{ url_for('login') }}">
+            <div class="form-group">
+                <label for="email" data-i18n="email_label">Email</label>
+                <input type="email" id="email" name="email" placeholder="Введіть ваш email" required>
+                <div class="error-message" id="emailError" data-i18n="email_error">Невірний формат email</div>
+            </div>
+            <div class="form-group">
+                <label for="password" data-i18n="password_label">Пароль</label>
+                <input type="password" id="password" name="password" placeholder="Введіть ваш пароль" required>
+                <div class="error-message" id="passwordError" data-i18n="password_error">Пароль має бути не менше 6 символів</div>
+            </div>
+            <button type="submit" class="btn-submit" data-i18n="submit">Увійти</button>
+        </form>
+        <div class="feature-icon">
+            <i class="fas fa-cogs"></i> <span data-i18n="feature">Розумний ШІ створить план за тебе</span>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Простая интернационализация
+        const translations = {
+            ua: {
+                title: "ШІ-Тренер - Вхід",
+                welcome: "Ласкаво просимо до ШІ-Тренер!",
+                subtitle: "Ваш персональний помічник для створення ідеального плану тренувань.",
+                register: "Реєстрація",
+                login: "Вхід",
+                google_login: "Увійти через Google",
+                email_label: "Email",
+                email_error: "Невірний формат email",
+                password_label: "Пароль",
+                password_error: "Пароль має бути не менше 6 символів",
+                submit: "Увійти",
+                feature: "Умний ШІ створить план за тебе"
+            },
+            en: {
+                title: "AI-Trainer - Login",
+                welcome: "Welcome to AI-Trainer!",
+                subtitle: "Your personal assistant for creating the perfect workout plan.",
+                register: "Register",
+                login: "Login",
+                google_login: "Login with Google",
+                email_label: "Email",
+                email_error: "Invalid email format",
+                password_label: "Password",
+                password_error: "Password must be at least 6 characters",
+                submit: "Login",
+                feature: "Smart AI will create a plan for you"
+            },
+            pl: {
+                title: "AI-Trainer - Logowanie",
+                welcome: "Witamy w AI-Trainer!",
+                subtitle: "Twój osobisty asystent do tworzenia idealnego planu treningowego.",
+                register: "Zarejestruj się",
+                login: "Zaloguj się",
+                google_login: "Zaloguj się przez Google",
+                email_label: "Email",
+                email_error: "Nieprawidłowy format email",
+                password_label: "Hasło",
+                password_error: "Hasło musi mieć co najmniej 6 znaków",
+                submit: "Zaloguj się",
+                feature: "Inteligentna AI stworzy plan dla Ciebie"
+            }
+        };
+
+        function setLanguage(lang) {
+            sessionStorage.setItem('lang', lang);
+            window.location.href = `/set_language/${lang}`;
+        }
+
+        function applyTranslations(lang) {
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                element.innerHTML = translations[lang][key];
+            });
+            document.title = translations[lang].title;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = sessionStorage.getItem('lang') || 'ua';
+            applyTranslations(savedLang);
+
+            // Добавляем класс loaded для плавного появления
+            const container = document.querySelector('.container');
+            container.classList.add('loaded');
+
+            // Валидация формы
+            const form = document.getElementById('loginForm');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const emailError = document.getElementById('emailError');
+            const passwordError = document.getElementById('passwordError');
+
+            form.addEventListener('submit', (e) => {
+                let valid = true;
+
+                // Валидация email
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailPattern.test(emailInput.value)) {
+                    emailError.style.display = 'block';
+                    valid = false;
+                } else {
+                    emailError.style.display = 'none';
+                }
+
+                // Валидация пароля
+                if (passwordInput.value.length < 6) {
+                    passwordError.style.display = 'block';
+                    valid = false;
+                } else {
+                    passwordError.style.display = 'none';
+                }
+
+                if (!valid) {
+                    e.preventDefault();
+                }
+            });
+        });
+
+        function showLoginForm() {
+            const loginForm = document.getElementById('loginForm');
+            loginForm.classList.toggle('active');
+        }
+    </script>
+    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'92fa3dd71f25b08b',t:'MTc0NDUzOTczOC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+</body>
+</html>

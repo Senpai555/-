@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Тренажер розминки</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.9)), url('https://images.unsplash.com/photo-1593079831268-3381b0db4a77?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+      margin: 0;
+      padding: 0;
+    }
+    #warmup-trainer {
+      text-align: center;
+      padding: 30px;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      width: 400px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.1);
+      animation: slideIn 1s ease-out;
+      position: relative;
+    }
+    @keyframes slideIn {
+      0% { transform: translateY(50px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+    #warmup-trainer::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      right: -1px;
+      bottom: -1px;
+      border-radius: 15px;
+      background: linear-gradient(45deg, #00f, #f0f, #0ff, #00f);
+      background-size: 600% 600%;
+      animation: gradientFlow 10s ease infinite;
+      z-index: -1;
+      opacity: 0.5;
+    }
+    @keyframes gradientFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    #warmup-trainer::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 50px;
+      height: 100px;
+      background: linear-gradient(90deg, rgba(0, 255, 255, 0.3), rgba(0, 255, 255, 0));
+      opacity: 0.3;
+      z-index: -1;
+    }
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+      text-shadow: 0 0 5px #00f;
+    }
+    #exercise-name {
+      font-size: 1.2rem;
+      margin: 15px 0;
+      display: none;
+      text-shadow: 0 0 3px #f0f;
+    }
+    #exercise-video {
+      width: 300px;
+      height: 300px;
+      margin: 15px auto;
+      display: none;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 2px solid #fff;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+    #timer {
+      font-size: 3rem;
+      font-weight: 600;
+      margin: 15px 0;
+      color: #a100ff;
+      text-shadow: 0 0 10px #a100ff;
+    }
+    #timer.glow {
+      animation: timerGlow 0.5s infinite alternate;
+    }
+    @keyframes timerGlow {
+      from { text-shadow: 0 0 10px #a100ff, 0 0 20px #a100ff; }
+      to { text-shadow: 0 0 20px #a100ff, 0 0 30px #a100ff; }
+    }
+    #timer.warning {
+      animation: timerWarning 0.3s infinite;
+    }
+    @keyframes timerWarning {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+    #progress-bar {
+      width: 80%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 5px;
+      margin: 15px auto;
+      overflow: hidden;
+    }
+    #progress {
+      height: 100%;
+      background: linear-gradient(90deg, #a100ff, #00d4ff, #00ff00);
+      background-size: 600% 600%;
+      animation: gradientFlow 10s ease infinite;
+      width: 0;
+      transition: width 0.5s ease;
+    }
+    #controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 15px;
+      flex-wrap: wrap;
+    }
+    button {
+      padding: 12px 25px;
+      font-size: 1rem;
+      background: linear-gradient(90deg, #a100ff, #00d4ff);
+      border: none;
+      border-radius: 20px;
+      color: #fff;
+      cursor: pointer;
+      transition: transform 0.3s;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    }
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+    }
+    #completion-message {
+      display: none;
+      font-size: 1.2rem;
+      margin-top: 20px;
+      color: #00d4ff;
+      text-shadow: 0 0 10px #00d4ff, 0 0 20px #00d4ff;
+      animation: fadeIn 1s ease-in;
+    }
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    #status-panel {
+      position: absolute;
+      bottom: 20px;
+      width: 100%;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #00d4ff;
+      text-shadow: 0 0 5px #00d4ff;
+    }
+    .header-container {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      position: relative;
+      margin-bottom: 15px;
+    }
+    .sound-toggle {
+      position: fixed;
+      top: 20px;
+      left: 0;
+      margin-left: 0;
+      padding-left: 0;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #fff;
+      transition: transform 0.3s ease;
+      z-index: 10;
+    }
+    .sound-toggle:hover {
+      transform: scale(1.2);
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      position: relative;
+      width: 300px;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.1);
+      animation: slideIn 1s ease-out;
+      text-align: center;
+      color: #fff;
+      font-size: 1.2rem;
+      text-shadow: 0 0 5px #00f;
+    }
+    .modal-content::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      right: -1px;
+      bottom: -1px;
+      border-radius: 15px;
+      background: linear-gradient(45deg, #00f, #f0f, #0ff, #00f);
+      background-size: 600% 600%;
+      animation: gradientFlow 10s ease infinite;
+      z-index: -1;
+      opacity: 0.5;
+    }
+    .modal-buttons {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+    .modal-buttons button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      background: linear-gradient(90deg, #a100ff, #00d4ff);
+      border: none;
+      border-radius: 20px;
+      color: #fff;
+      cursor: pointer;
+      transition: transform 0.3s;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    }
+    .modal-buttons button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+    }
+    .modal-buttons .cancel-btn {
+      background: #555;
+    }
+  </style>
+</head>
+<body>
+  <div id="warmup-trainer">
+    <div class="header-container">
+      <h1>Тренажер розминки</h1>
+    </div>
+    <div id="exercise-name">Натисни, щоб почати</div>
+    <video id="exercise-video" muted loop playsinline style="display: none;">
+      <source src="https://videos.pexels.com/video-files/4764220/4764220-sd_360_640_30fps.mp4" type="video/mp4">
+      Ваш браузер не підтримує відео.
+    </video>
+    <div id="timer">00:00</div>
+    <div id="progress-bar"><div id="progress"></div></div>
+    <div id="controls">
+      <button id="start-btn">Почати</button>
+      <button id="pause-btn" style="display: none;">Пауза</button>
+      <button id="next-btn" style="display: none;">Наступна вправа</button>
+      <button id="abort-btn" style="display: none;">Завершити достроково</button>
+    </div>
+    <audio id="background-music" loop>
+      <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+      Ваш браузер не підтримує аудіо.
+    </audio>
+    <div id="completion-message"></div>
+  </div>
+  <div id="status-panel"></div>
+  <div class="sound-toggle" id="sound-toggle">
+    <i class="fas fa-volume-up"></i>
+  </div>
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      Ви впевнені, що хочете завершити тренування достроково?
+      <div class="modal-buttons">
+        <button id="confirm-btn">OK</button>
+        <button id="cancel-btn" class="cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let exercises = [
+      { name: "Стрибки Джампінг Джек", duration: 30, video: "https://videos.pexels.com/video-files/4764220/4764220-sd_360_640_30fps.mp4" },
+      { name: "Розтяжка ніг", duration: 30, video: "https://videos.pexels.com/video-files/6296554/6296554-sd_960_406_25fps.mp4" },
+      { name: "Підйом на носки", duration: 30, video: "https://videos.pexels.com/video-files/32115656/13692093_360_640_24fps.mp4" },
+      { name: "Присідання з махами", duration: 30, video: "https://videos.pexels.com/video-files/2785531/2785531-sd_360_640_25fps.mp4" },
+      { name: "Кішка-корова", duration: 30, video: "https://videos.pexels.com/video-files/8480627/8480627-sd_640_360_25fps.mp4" },
+      { name: "Обертання руками", duration: 30, video: "https://videos.pexels.com/video-files/4488007/4488007-sd_640_360_25fps.mp4" }
+    ];
+    let current = 0;
+    let timer;
+    let countdown = 0;
+    let isRunning = false;
+    let isPaused = false;
+    let totalDuration = exercises.reduce((sum, ex) => sum + ex.duration, 0);
+    let elapsedTime = 0;
+    let musicPlaying = false;
+
+    const exerciseName = document.getElementById('exercise-name');
+    const exerciseVideo = document.getElementById('exercise-video');
+    const timerEl = document.getElementById('timer');
+    const progress = document.getElementById('progress');
+    const startBtn = document.getElementById('start-btn');
+    const pauseBtn = document.getElementById('pause-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const abortBtn = document.getElementById('abort-btn');
+    const completionMessage = document.getElementById('completion-message');
+    const statusPanel = document.getElementById('status-panel');
+    const backgroundMusic = document.getElementById('background-music');
+    const soundToggle = document.getElementById('sound-toggle');
+    const modal = document.getElementById('modal');
+    const confirmBtn = document.getElementById('confirm-btn');
+    const cancelBtn = document.getElementById('cancel-btn');
+
+    function updateTimerDisplay(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      timerEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      if (seconds <= 5 && seconds > 0) {
+        timerEl.classList.add('warning');
+      } else {
+        timerEl.classList.remove('warning');
+      }
+      timerEl.classList.add('glow');
+    }
+
+    function updateProgress() {
+      const percent = ((current + 1) / exercises.length) * 100;
+      progress.style.width = `${percent}%`;
+    }
+
+    function updateStatusPanel() {
+      const totalElapsed = elapsedTime + (exercises[current].duration - countdown);
+      const remainingTime = totalDuration - totalElapsed;
+      const remainingMins = Math.floor(remainingTime / 60);
+      const remainingSecs = remainingTime % 60;
+      statusPanel.textContent = `${exerciseName.textContent} (${current + 1} з ${exercises.length}) – залишилось ${remainingMins}:${remainingSecs.toString().padStart(2, '0')}`;
+    }
+
+    function startExercise() {
+      if (current >= exercises.length) {
+        exerciseName.style.display = 'none';
+        exerciseVideo.style.display = 'none';
+        exerciseVideo.pause();
+        timerEl.style.display = 'none';
+        startBtn.style.display = 'none';
+        pauseBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+        abortBtn.style.display = 'none';
+        const totalMins = Math.floor(elapsedTime / 60);
+        const totalSecs = elapsedTime % 60;
+        const displayTime = totalSecs > 0 ? `${totalMins} хв ${totalSecs} сек` : `${totalMins} хв`;
+        completionMessage.innerHTML = `Тривалість: ${displayTime}, Вправ: ${exercises.length}, Статус: Успішно завершено 🎉👍<br><div style="margin-top: 20px;"><button id="restart-btn" style="margin-right: 10px;">Почати знову</button><button id="menu-btn">Назад до меню</button></div>`;
+        completionMessage.style.display = 'block';
+        statusPanel.style.display = 'none';
+        backgroundMusic.pause();
+        musicPlaying = false;
+        soundToggle.innerHTML = '<i class="fas fa-volume-mute"></i>';
+
+        document.getElementById('restart-btn').addEventListener('click', () => {
+          current = 0;
+          elapsedTime = 0;
+          completionMessage.style.display = 'none';
+          startBtn.style.display = 'inline-block';
+          statusPanel.style.display = 'block';
+          isRunning = false;
+        });
+
+        document.getElementById('menu-btn').addEventListener('click', () => {
+          window.location.href = '/profile';
+        });
+
+        return;
+      }
+
+      exerciseName.textContent = exercises[current].name;
+      exerciseName.style.display = 'block';
+      if (exercises[current].video) {
+        exerciseVideo.src = exercises[current].video;
+        exerciseVideo.style.display = 'block';
+        exerciseVideo.play().catch(error => {
+          console.log('Помилка відтворення відео: ', error);
+        });
+      } else {
+        exerciseVideo.style.display = 'none';
+        exerciseVideo.pause();
+      }
+      countdown = exercises[current].duration;
+      updateTimerDisplay(countdown);
+      updateProgress();
+      updateStatusPanel();
+
+      clearInterval(timer);
+      timer = setInterval(() => {
+        if (!isPaused) {
+          countdown--;
+          elapsedTime++;
+          updateTimerDisplay(countdown);
+          updateStatusPanel();
+          if (countdown <= 0) {
+            clearInterval(timer);
+            current++;
+            startExercise();
+          }
+        }
+      }, 1000);
+    }
+
+    startBtn.addEventListener('click', async () => {
+      if (!isRunning) {
+        isRunning = true;
+        startBtn.style.display = 'none';
+        pauseBtn.style.display = 'inline-block';
+        nextBtn.style.display = 'inline-block';
+        abortBtn.style.display = 'inline-block';
+        startExercise();
+
+        try {
+          backgroundMusic.load();
+          const canPlay = backgroundMusic.canPlayType('audio/mpeg');
+          if (!canPlay) {
+            console.log('Браузер не підтримує тип файлу audio/mpeg');
+            return;
+          }
+          await backgroundMusic.play();
+          musicPlaying = true;
+          soundToggle.innerHTML = '<i class="fas fa-volume-up"></i>';
+        } catch (error) {
+          console.log('Помилка відтворення аудіо: ', error);
+        }
+      }
+    });
+
+    pauseBtn.addEventListener('click', () => {
+      isPaused = !isPaused;
+      pauseBtn.textContent = isPaused ? 'Продовжити' : 'Пауза';
+      if (isPaused) {
+        exerciseVideo.pause();
+      } else {
+        exerciseVideo.play();
+      }
+    });
+
+    nextBtn.addEventListener('click', () => {
+      clearInterval(timer);
+      current++;
+      startExercise();
+    });
+
+    abortBtn.addEventListener('click', () => {
+      modal.style.display = 'flex';
+    });
+
+    confirmBtn.addEventListener('click', () => {
+      if (confirmBtn) {
+        clearInterval(timer);
+        current = exercises.length;
+        startExercise();
+        modal.style.display = 'none';
+      }
+    });
+
+    cancelBtn.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+
+    document.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      if (touchStartX - touchEndX > 50 && current < exercises.length - 1) {
+        clearInterval(timer);
+        current++;
+        startExercise();
+      } else if (touchEndX - touchStartX > 50 && current > 0) {
+        clearInterval(timer);
+        current--;
+        startExercise();
+      }
+    });
+
+    soundToggle.addEventListener('click', async () => {
+      if (musicPlaying) {
+        backgroundMusic.pause();
+        musicPlaying = false;
+        soundToggle.innerHTML = '<i class="fas fa-volume-mute"></i>';
+      } else {
+        try {
+          backgroundMusic.load();
+          const canPlay = backgroundMusic.canPlayType('audio/mpeg');
+          if (!canPlay) {
+            console.log('Браузер не підтримує тип файлу audio/mpeg');
+            return;
+          }
+          await backgroundMusic.play();
+          musicPlaying = true;
+          soundToggle.innerHTML = '<i class="fas fa-volume-up"></i>';
+        } catch (error) {
+          console.log('Помилка відтворення аудіо: ', error);
+        }
+      }
+    });
+
+    backgroundMusic.addEventListener('error', (e) => {
+      console.log('Помилка завантаження аудіо: ', e);
+      console.log('Код помилки: ', backgroundMusic.error.code);
+      console.log('Повідомлення про помилку: ', backgroundMusic.error.message);
+    });
+
+    backgroundMusic.addEventListener('loadeddata', () => {
+      console.log('Аудіо успішно завантажено');
+    });
+
+    exerciseVideo.addEventListener('error', (e) => {
+      console.log('Помилка завантаження відео: ', e);
+      console.log('Код помилки: ', exerciseVideo.error.code);
+      console.log('Повідомлення про помилку: ', exerciseVideo.error.message);
+    });
+
+    exerciseVideo.addEventListener('loadeddata', () => {
+      console.log('Відео успішно завантажено');
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Видалено логіку перемикання мови
+    });
+  </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93a1590ee8b1453d',t:'MTc0NjI5MTk3NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+</body>
+</html>

@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ласкаво просимо до ШІ-Тренер!</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        :root {
+            --text-color: #fff;
+            --accent-color: #E4B062;
+            --button-bg: #4285F4;
+            --gradient-bg: linear-gradient(45deg, #ff6b6b, #feca57, #48dbfb);
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-color);
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        .background-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            opacity: 0.4;
+        }
+        /* Навигация */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 15px 0;
+            z-index: 1000;
+        }
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+        }
+        .navbar ul li {
+            margin: 0 20px;
+        }
+        .navbar ul li a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: color 0.3s ease;
+        }
+        .navbar ul li a:hover {
+            color: var(--accent-color);
+        }
+        /* Языки */
+        .language-switcher {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+        .language-switcher button {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .language-switcher button:hover {
+            transform: scale(1.2);
+        }
+        /* Герой-блок */
+        .hero-section {
+            text-align: center;
+            padding: 150px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        .hero-section h1 {
+            font-size: 4.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: var(--text-color);
+            text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
+            background: var(--gradient-bg);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .hero-section h1 i {
+            color: var(--accent-color);
+            margin-right: 15px;
+        }
+        .hero-section p {
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 40px;
+            max-width: 800px;
+            line-height: 1.6;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+        .btn-continue {
+            background: var(--button-bg);
+            color: white;
+            font-size: 1.3rem;
+            font-weight: 600;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 5px 15px rgba(66, 133, 244, 0.4);
+        }
+        .btn-continue:hover {
+            background: #3267D6;
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(66, 133, 244, 0.6);
+        }
+        /* Как работает */
+        .how-it-works {
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        .how-it-works h2 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .steps {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        .step {
+            text-align: center;
+            max-width: 300px;
+            margin: 20px;
+        }
+        .step i {
+            font-size: 3rem;
+            color: var(--accent-color);
+            margin-bottom: 20px;
+        }
+        .step h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .step p {
+            font-size: 1rem;
+            font-weight: 300;
+        }
+        /* Майбутні розробки */
+        .future-section {
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+        }
+        .future-section h2 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .future-section ul {
+            list-style: none;
+            padding: 0;
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+        .future-section ul li {
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+        }
+        .future-section ul li i {
+            color: var(--accent-color);
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        /* Отзывы */
+        .testimonials-section {
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        .testimonials-section h2 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .testimonial-cards {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .testimonial-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 300px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+        .testimonial-card img {
+            width: 100%;
+            height: 250px; /* Збільшено висоту для повного відображення */
+            object-fit: contain; /* Змінено на contain, щоб показати все зображення */
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        .testimonial-card p {
+            font-size: 1rem;
+            font-weight: 300;
+            color: #fff;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        /* День с ШІ-Тренером */
+        .day-schedule {
+            padding: 60px 20px;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        .day-schedule h2 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .schedule-items {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .schedule-item {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .schedule-item i {
+            font-size: 2rem;
+            color: var(--accent-color);
+            margin-right: 20px;
+        }
+        .schedule-item div {
+            text-align: left;
+        }
+        .schedule-item div h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .schedule-item div p {
+            font-size: 1rem;
+            font-weight: 300;
+        }
+        /* Другие проекты */
+        .projects-section {
+            padding: 60px 20px;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        .projects-section h2 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .project-cards {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .project-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 300px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .project-card h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .project-card p {
+            font-size: 1rem;
+            font-weight: 300;
+        }
+        .project-card .soon {
+            color: var(--accent-color);
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        /* Футер */
+        footer {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 40px 20px;
+            text-align: center;
+        }
+        footer p {
+            font-size: 0.9rem;
+            font-weight: 300;
+            margin: 0;
+        }
+        footer .social-links {
+            margin: 20px 0;
+        }
+        footer .social-links a {
+            color: var(--text-color);
+            margin: 0 10px;
+            font-size: 1.5rem;
+            transition: color 0.3s ease;
+        }
+        footer .social-links a:hover {
+            color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Фоновое видео -->
+    <video autoplay muted loop class="background-video">
+        <source src="https://assets.mixkit.co/videos/preview/mixkit-man-lifting-weights-in-the-gym-4112-large.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <!-- Навигация -->
+    <nav class="navbar">
+        <ul>
+            <li><a href="#welcome" data-i18n="nav_home">Головна</a></li>
+            <li><a href="#how-it-works" data-i18n="nav_features">Можливості</a></li>
+            <li><a href="#future" data-i18n="nav_future">Майбутнє</a></li>
+            <li><a href="#contacts" data-i18n="nav_contacts">Контакти</a></li>
+        </ul>
+    </nav>
+
+    <!-- Переключение языков -->
+    <div class="language-switcher">
+        <button data-lang="ua" onclick="setLanguage('ua')">🇺🇦</button>
+        <button data-lang="en" onclick="setLanguage('en')">🇬🇧</button>
+        <button data-lang="pl" onclick="setLanguage('pl')">🇵🇱</button>
+    </div>
+
+    <!-- Герой-блок -->
+    <div class="hero-section" id="welcome">
+        <div data-aos="zoom-in">
+            <h1><i class="fas fa-dumbbell"></i> <span data-i18n="welcome">Вітаємо в ШІ-Тренер!</span></h1>
+        </div>
+        <div data-aos="fade-up" data-aos-delay="200">
+            <p data-i18n="welcome_description">
+                Ваш персональний помічник для створення ідеального плану тренувань! Ми використовуємо штучний інтелект, щоб допомогти вам досягти ваших фітнес-цілей швидко та ефективно.
+            </p>
+        </div>
+        <div data-aos="zoom-in" data-aos-delay="400">
+            <a href="{{ url_for('profile') }}" class="btn btn-continue" data-i18n="start_training">Розпочати тренування!</a>
+        </div>
+    </div>
+
+    <!-- Как работает ШІ-Тренер -->
+    <section class="how-it-works" id="how-it-works">
+        <h2 data-aos="fade-up" data-i18n="how_it_works">Як працює ШІ-Тренер</h2>
+        <div class="steps">
+            <div class="step" data-aos="fade-up" data-aos-delay="200">
+                <i class="fas fa-brain"></i>
+                <h3 data-i18n="step1_title">Аналізує твій рівень</h3>
+                <p data-i18n="step1_description">ШІ оцінює твої фізичні дані та рівень підготовки.</p>
+            </div>
+            <div class="step" data-aos="fade-up" data-aos-delay="400">
+                <i class="fas fa-chart-line"></i>
+                <h3 data-i18n="step2_title">Формує персональний план</h3>
+                <p data-i18n="step2_description">Створює індивідуальний план тренувань та харчування.</p>
+            </div>
+            <div class="step" data-aos="fade-up" data-aos-delay="600">
+                <i class="fas fa-dumbbell"></i>
+                <h3 data-i18n="step3_title">Супроводжує і коригує</h3>
+                <p data-i18n="step3_description">Допомагає адаптувати план у процесі тренувань.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Майбутні розробки -->
+    <section class="future-section" id="future">
+        <h2 data-aos="fade-up" data-i18n="future_developments">Наші майбутні розробки</h2>
+        <ul data-aos="fade-up" data-aos-delay="200">
+            <li><i class="fas fa-check-circle"></i> <span data-i18n="future1">Інтеграція з фітнес-трекерами для відстеження прогресу.</span></li>
+            <li><i class="fas fa-check-circle"></i> <span data-i18n="future2">Додаток для iOS та Android.</span></li>
+            <li><i class="fas fa-check-circle"></i> <span data-i18n="future3">Розширена аналітика тренувань з графіками.</span></li>
+            <li><i class="fas fa-check-circle"></i> <span data-i18n="future4">Спільнота для обміну досвідом між користувачами.</span></li>
+        </ul>
+    </section>
+
+    <!-- Отзывы -->
+    <section class="testimonials-section">
+        <h2 data-aos="fade-up" data-i18n="testimonials">Відгуки користувачів</h2>
+        <div class="testimonial-cards">
+            <div class="testimonial-card" data-aos="fade-up" data-aos-delay="200">
+                <img src="{{ url_for('static', filename='user1.jpg') }}" alt="До/Після">
+                <p data-i18n="testimonial1">"ШІ-Тренер допоміг мені скинути 8 кг за 2 місяці! Дуже зручний і мотивуючий!"</p>
+            </div>
+            <div class="testimonial-card" data-aos="fade-up" data-aos-delay="400">
+                <img src="{{ url_for('static', filename='user2.jpg') }}" alt="До/Після">
+                <p data-i18n="testimonial2">"Завдяки персоналізованому плану я нарешті досяг своєї мети! Рекомендую!"</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- День с ШІ-Тренером -->
+    <section class="day-schedule">
+        <h2 data-aos="fade-up" data-i18n="day_schedule">День з ШІ-Тренером</h2>
+        <div class="schedule-items">
+            <div class="schedule-item" data-aos="fade-up" data-aos-delay="200">
+                <i class="fas fa-sun"></i>
+                <div>
+                    <h3 data-i18n="schedule1_title">8:00 – Ранкове тренування</h3>
+                    <p data-i18n="schedule1_description">Силові вправи для заряду енергії на весь день.</p>
+                </div>
+            </div>
+            <div class="schedule-item" data-aos="fade-up" data-aos-delay="400">
+                <i class="fas fa-utensils"></i>
+                <div>
+                    <h3 data-i18n="schedule2_title">12:00 – Рекомендований обід</h3>
+                    <p data-i18n="schedule2_description">Збалансоване харчування для відновлення сил.</p>
+                </div>
+            </div>
+            <div class="schedule-item" data-aos="fade-up" data-aos-delay="600">
+                <i class="fas fa-spa"></i>
+                <div>
+                    <h3 data-i18n="schedule3_title">19:00 – Релакс із йога-сесією</h3>
+                    <p data-i18n="schedule3_description">Розслаблення та відновлення після дня.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Другие проекты -->
+    <section class="projects-section" id="projects">
+        <h2 data-aos="fade-up" data-i18n="other_projects">Наші інші проєкти</h2>
+        <div class="project-cards">
+            <div class="project-card" data-aos="fade-up" data-aos-delay="200">
+                <h3 data-i18n="project1_title">AI-Дієтолог</h3>
+                <p data-i18n="project1_description">Інструмент для складання персонального харчування.</p>
+                <div class="soon" data-i18n="soon">Скоро</div>
+            </div>
+            <div class="project-card" data-aos="fade-up" data-aos-delay="400">
+                <h3 data-i18n="project2_title">Розумна йога</h3>
+                <p data-i18n="project2_description">Асистент з йоги з віртуальним тренером.</p>
+                <div class="soon" data-i18n="soon">Скоро</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Футер -->
+    <footer id="contacts">
+        <div class="social-links">
+            <a href="#"><i class="fab fa-facebook"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+        </div>
+        <p data-i18n="footer">Контакти: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="a3cacdc5cce3c2ca8ed7d1c2cacdc6d18dc0ccce">[email protected]</a> | © 2025 ШІ-Тренер. Усі права захищені.</p>
+    </footer>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 1000,
+            once: true
+        });
+
+        const translations = {
+            ua: {
+                welcome: "Вітаємо в ШІ-Тренер!",
+                welcome_description: "Ваш персональний помічник для створення ідеального плану тренувань! Ми використовуємо штучний інтелект, щоб допомогти вам досягти ваших фітнес-цілей швидко та ефективно.",
+                start_training: "Розпочати тренування!",
+                how_it_works: "Як працює ШІ-Тренер",
+                step1_title: "Аналізує твій рівень",
+                step1_description: "ШІ оцінює твої фізичні дані та рівень підготовки.",
+                step2_title: "Формує персональний план",
+                step2_description: "Створює індивідуальний план тренувань та харчування.",
+                step3_title: "Супроводжує і коригує",
+                step3_description: "Допомагає адаптувати план у процесі тренувань.",
+                future_developments: "Наші майбутні розробки",
+                future1: "Інтеграція з фітнес-трекерами для відстеження прогресу.",
+                future2: "Додаток для iOS та Android.",
+                future3: "Розширена аналітика тренувань з графіками.",
+                future4: "Спільнота для обміну досвідом між користувачами.",
+                testimonials: "Відгуки користувачів",
+                testimonial1: "ШІ-Тренер допоміг мені скинути 8 кг за 2 місяці! Дуже зручний і мотивуючий!",
+                testimonial2: "Завдяки персоналізованому плану я нарешті досяг своєї мети! Рекомендую!",
+                day_schedule: "День з ШІ-Тренером",
+                schedule1_title: "8:00 – Ранкове тренування",
+                schedule1_description: "Силові вправи для заряду енергії на весь день.",
+                schedule2_title: "12:00 – Рекомендований обід",
+                schedule2_description: "Збалансоване харчування для відновлення сил.",
+                schedule3_title: "19:00 – Релакс із йога-сесією",
+                schedule3_description: "Розслаблення та відновлення після дня.",
+                other_projects: "Наші інші проєкти",
+                project1_title: "AI-Дієтолог",
+                project1_description: "Інструмент для складання персонального харчування.",
+                project2_title: "Розумна йога",
+                project2_description: "Асистент з йоги з віртуальним тренером.",
+                soon: "Скоро",
+                footer: "Контакти: <a href='/cdn-cgi/l/email-protection' class='__cf_email__' data-cfemail='a3cacdc5cce3c2ca8ed7d1c2cacdc6d18dc0ccce'>[email protected]</a> | © 2025 ШІ-Тренер. Усі права захищені.",
+                nav_home: "Головна",
+                nav_features: "Можливості",
+                nav_future: "Майбутнє",
+                nav_contacts: "Контакти"
+            },
+            en: {
+                welcome: "Welcome to AI-Trainer!",
+                welcome_description: "Your personal assistant for creating the perfect workout plan! We use artificial intelligence to help you achieve your fitness goals quickly and effectively.",
+                start_training: "Start Training!",
+                how_it_works: "How AI-Trainer Works",
+                step1_title: "Analyzes Your Level",
+                step1_description: "AI assesses your physical data and fitness level.",
+                step2_title: "Creates a Personalized Plan",
+                step2_description: "Develops a customized workout and nutrition plan.",
+                step3_title: "Guides and Adjusts",
+                step3_description: "Helps adapt the plan during your training process.",
+                future_developments: "Our Future Developments",
+                future1: "Integration with fitness trackers to monitor progress.",
+                future2: "App for iOS and Android.",
+                future3: "Advanced workout analytics with charts.",
+                future4: "Community for sharing experiences among users.",
+                testimonials: "User Reviews",
+                testimonial1: "AI-Trainer helped me lose 8 kg in 2 months! Very convenient and motivating!",
+                testimonial2: "Thanks to the personalized plan, I finally reached my goal! Highly recommend!",
+                day_schedule: "A Day with AI-Trainer",
+                schedule1_title: "8:00 – Morning Workout",
+                schedule1_description: "Strength exercises to energize your day.",
+                schedule2_title: "12:00 – Recommended Lunch",
+                schedule2_description: "Balanced nutrition to restore energy.",
+                schedule3_title: "19:00 – Relaxation with Yoga",
+                schedule3_description: "Relaxation and recovery after the day.",
+                other_projects: "Our Other Projects",
+                project1_title: "AI-Dietitian",
+                project1_description: "A tool for creating a personalized nutrition plan.",
+                project2_title: "Smart Yoga",
+                project2_description: "Yoga assistant with a virtual trainer.",
+                soon: "Coming Soon",
+                footer: "Contact: <a href='/cdn-cgi/l/email-protection' class='__cf_email__' data-cfemail='a3cacdc5cce3c2ca8ed7d1c2cacdc6d18dc0ccce'>[email protected]</a> | © 2025 AI-Trainer. All rights reserved.",
+                nav_home: "Home",
+                nav_features: "Features",
+                nav_future: "Future",
+                nav_contacts: "Contacts"
+            },
+            pl: {
+                welcome: "Witamy w AI-Trainer!",
+                welcome_description: "Twój osobisty asystent do tworzenia idealnego planu treningowego! Używamy sztucznej inteligencji, aby pomóc Ci osiągnąć Twoje cele fitness szybko i skutecznie.",
+                start_training: "Rozpocznij trening!",
+                how_it_works: "Jak działa AI-Trainer",
+                step1_title: "Analizuje Twój poziom",
+                step1_description: "AI ocenia Twoje dane fizyczne i poziom przygotowania.",
+                step2_title: "Tworzy spersonalizowany plan",
+                step2_description: "Opracowuje indywidualny plan treningów i odżywiania.",
+                step3_title: "Prowadzi i koryguje",
+                step3_description: "Pomaga dostosować plan w trakcie treningów.",
+                future_developments: "Nasze przyszłe projekty",
+                future1: "Integracja z trackerami fitness do śledzenia postępów.",
+                future2: "Aplikacja na iOS i Android.",
+                future3: "Zaawansowana analityka treningów z wykresami.",
+                future4: "Społeczność do dzielenia się doświadczeniami między użytkownikami.",
+                testimonials: "Opinie użytkowników",
+                testimonial1: "AI-Trainer pomógł mi zrzucić 8 kg w 2 miesiące! Bardzo wygodny i motywujący!",
+                testimonial2: "Dzięki spersonalizowanemu planowi w końcu osiągnąłem swój cel! Polecam!",
+                day_schedule: "Dzień z AI-Trainer",
+                schedule1_title: "8:00 – Poranny trening",
+                schedule1_description: "Ćwiczenia siłowe, aby naładować energię na cały dzień.",
+                schedule2_title: "12:00 – Rekomendowany obiad",
+                schedule2_description: "Zrównoważone odżywianie dla regeneracji sił.",
+                schedule3_title: "19:00 – Relaks z sesją jogi",
+                schedule3_description: "Relaks i regeneracja po dniu.",
+                other_projects: "Nasze inne projekty",
+                project1_title: "AI-Dietetyk",
+                project1_description: "Narzędzie do tworzenia spersonalizowanego planu żywieniowego.",
+                project2_title: "Inteligentna joga",
+                project2_description: "Asystent jogi z wirtualnym trenerem.",
+                soon: "Wkrótce",
+                footer: "Kontakt: <a href='/cdn-cgi/l/email-protection' class='__cf_email__' data-cfemail='a3cacdc5cce3c2ca8ed7d1c2cacdc6d18dc0ccce'>[email protected]</a> | © 2025 AI-Trainer. Wszystkie prawa zastrzeżone.",
+                nav_home: "Strona główna",
+                nav_features: "Funkcje",
+                nav_future: "Przyszłość",
+                nav_contacts: "Kontakt"
+            }
+        };
+
+        function setLanguage(lang) {
+            sessionStorage.setItem('lang', lang);
+            window.location.href = `/set_language/${lang}`;
+        }
+
+        function applyTranslations(lang) {
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                element.innerHTML = translations[lang][key];
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = sessionStorage.getItem('lang') || 'ua';
+            applyTranslations(savedLang);
+
+            // Параллакс-эффект для герой-блока
+            const heroSection = document.querySelector('.hero-section');
+            heroSection.addEventListener('mousemove', (e) => {
+                const x = (e.clientX / window.innerWidth - 0.5) * 20;
+                const y = (e.clientY / window.innerHeight - 0.5) * 20;
+                heroSection.style.backgroundPosition = `${50 + x}% ${50 + y}%`;
+            });
+        });
+    </script>
+    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'92fa0627bd39e58e',t:'MTc0NDUzNzQ1Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+</body>
+</html>

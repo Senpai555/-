@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Фітнес Тест</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --neon-glow: #00f5d4;
+      --text-color: #fff;
+    }
+    body {
+      background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                  url('https://images.unsplash.com/photo-1593079831268-3381b0db4a77?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80') 
+                  no-repeat center center fixed;
+      background-size: cover;
+      color: var(--text-color);
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: auto;
+    }
+
+    .quiz-container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      max-width: 600px;
+      width: 90%;
+      text-align: center;
+      z-index: 1;
+      margin: 20px 0;
+      position: relative;
+    }
+
+    .progress-container {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-bar-inner {
+      height: 100%;
+      background: var(--neon-glow);
+      width: 0%;
+      transition: width 0.3s ease;
+      box-shadow: 0 0 15px var(--neon-glow);
+    }
+
+    .progress-text {
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.9rem;
+      color: var(--neon-glow);
+      text-shadow: 0 0 5px var(--neon-glow);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--neon-glow);
+      text-shadow: 0 0 15px var(--neon-glow), 0 0 25px #48dbfb;
+      margin-bottom: 20px;
+      animation: fadeIn 1.5s ease-in-out;
+    }
+
+    .question {
+      font-size: 1.5rem;
+      color: var(--neon-glow);
+      margin: 20px 0 10px;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    .answers button, .result-box button {
+      margin: 5px;
+      padding: 10px 20px;
+      border: 1px solid var(--neon-glow);
+      border-radius: 10px;
+      background: rgba(0, 245, 212, 0.2);
+      color: var(--neon-glow);
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      animation: pulse 2s infinite;
+    }
+
+    .answers button:hover, .result-box button:hover {
+      background: rgba(0, 245, 212, 0.4);
+      box-shadow: 0 0 15px var(--neon-glow);
+      transform: scale(1.05);
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 5px var(--neon-glow); }
+      50% { box-shadow: 0 0 15px var(--neon-glow); }
+      100% { box-shadow: 0 0 5px var(--neon-glow); }
+    }
+
+    .result-box {
+      background: rgba(0, 0, 0, 0.5);
+      border: 2px solid var(--neon-glow);
+      border-radius: 15px;
+      padding: 20px;
+      margin-top: 20px;
+      animation: fadeIn 0.5s ease-in-out;
+      position: relative;
+    }
+
+    .result-box h2 {
+      font-size: 1.5rem;
+      color: var(--neon-glow);
+      margin-bottom: 10px;
+    }
+
+    .result-box p {
+      font-size: 1rem;
+      text-align: left;
+      margin: 10px 0;
+    }
+
+    .fireworks {
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 50px;
+      animation: fireworks 1.5s ease infinite alternate;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0, 245, 212, 0.9);
+      color: #1a1a2e;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 1em;
+      font-weight: 600;
+      box-shadow: 0 0 15px var(--neon-glow);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 1002;
+    }
+
+    .toast.show {
+      opacity: 1;
+      animation: fadeInOut 1.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fireworks {
+      0% { opacity: 0.7; transform: scale(1) translateX(-50%); }
+      100% { opacity: 1; transform: scale(1.2) translateX(-50%); }
+    }
+
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateY(20px); }
+      10% { opacity: 1; transform: translateY(0); }
+      90% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(20px); }
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+      .question {
+        font-size: 1.2rem;
+      }
+      .answers button, .result-box button {
+        padding: 8px 15px;
+        font-size: 1rem;
+      }
+      .result-box h2 {
+        font-size: 1.2rem;
+      }
+      .result-box p {
+        font-size: 0.9rem;
+      }
+      .answers {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .answers button {
+        flex: 1 1 45%;
+        margin: 5px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-container">
+    <h1>🔍 Тест на рівень фізичної підготовки</h1>
+    <div class="progress-container">
+      <div class="progress-text" id="progressText"></div>
+      <div class="progress-bar"><div class="progress-bar-inner" id="progress"></div></div>
+    </div>
+    <div id="quiz"></div>
+  </div>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const quizData = [
+      {
+        question: "Скільки разів на тиждень ти займаєшся спортом?",
+        answers: ["🛌 0-1", "🏃 2-3", "💪 4-5", "🔥 6+"]
+      },
+      {
+        question: "Скільки разів ти можеш віджатися?",
+        answers: ["0-5", "6-10", "11-20", "20+"]
+      },
+      {
+        question: "Який твій рівень витривалості?",
+        answers: ["Низький", "Середній", "Високий"]
+      },
+      {
+        question: "Чи маєш досвід занять у залі?",
+        answers: ["Немає", "Трохи", "Так"]
+      },
+      {
+        question: "Чи можеш утримати планку понад 30 сек?",
+        answers: ["Ні", "Так"]
+      },
+      {
+        question: "Як ти оцінюєш свою гнучкість?",
+        answers: ["Погана", "Нормальна", "Хороша", "Відмінна"]
+      },
+      {
+        question: "Скільки часу можеш бігти без зупинки?",
+        answers: ["0-1 хв", "1-5 хв", "5-10 хв", "10+ хв"]
+      },
+      {
+        question: "Яка твоя основна ціль?",
+        answers: ["Схуднути", "Набрати масу", "Підтримка форми", "Не знаю"]
+      },
+      {
+        question: "Де ти плануєш тренуватись?",
+        answers: ["Вдома", "У залі", "На вулиці"]
+      },
+      {
+        question: "Чи займаєшся ти розтяжкою хоча б раз на тиждень?",
+        answers: ["Ні", "Так"]
+      },
+      {
+        question: "Скільки разів на тиждень ти виконуєш вправи на прес?",
+        answers: ["0-1", "2-3", "4-5", "6+"]
+      },
+      {
+        question: "Чи можеш ти підтягнутися хоча б 1 раз?",
+        answers: ["Ні", "Так"]
+      },
+      {
+        question: "Скільки годин на добу ти спиш?",
+        answers: ["Менше 6", "6-7", "8-9", "Більше 9"]
+      },
+      {
+        question: "Чи відчуваєш ти мотивацію до тренувань?",
+        answers: ["Ні", "Іноді", "Так"]
+      },
+      {
+        question: "Чи брав ти участь у спортивних змаганнях?",
+        answers: ["Ні", "Так"]
+      }
+    ];
+
+    const quizEl = document.getElementById("quiz");
+    const progressBar = document.getElementById("progress");
+    const progressText = document.getElementById("progressText");
+    let currentQuestion = 0;
+    let score = 0;
+
+    function showQuestion() {
+      const q = quizData[currentQuestion];
+      const progressPercent = Math.floor((currentQuestion / quizData.length) * 100);
+      progressBar.style.width = `${progressPercent}%`;
+      progressText.textContent = `Питання ${currentQuestion + 1} з ${quizData.length}`;
+
+      quizEl.innerHTML = `
+        <div class="question">${q.question}</div>
+        <div class="answers">
+          ${q.answers.map((a, i) => `<button onclick="selectAnswer(${i})">${a}</button>`).join('')}
+        </div>
+      `;
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+    }
+
+    function selectAnswer(index) {
+      score += index;
+      showToast("Гарний вибір! 💪");
+      currentQuestion++;
+      if (currentQuestion < quizData.length) {
+        showQuestion();
+      } else {
+        localStorage.setItem("fitness_score", score);
+        showResult(score);
+      }
+    }
+
+    function showResult(score) {
+      let level = "";
+      let tip = "";
+      let extraAnimation = "";
+
+      if (score < 15) {
+        level = "Початковий рівень";
+        tip = "Почни з легких вправ: спробуй 10-хвилинну зарядку щодня і поступово додавай прогулянки або легкий біг.";
+      } else if (score < 30) {
+        level = "Середній рівень";
+        tip = "Ти вже на хорошому рівні! Додай до своїх тренувань 2-3 силові вправи на тиждень, наприклад, присідання або віджимання.";
+      } else {
+        level = "Просунутий рівень";
+        tip = "Ти в чудовій формі! Спробуй інтенсивні тренування, наприклад, інтервальні забіги або тренування з вагою тіла.";
+        extraAnimation = `<div class='fireworks'>🎆</div>`;
+      }
+
+      progressBar.style.width = `100%`;
+      progressText.textContent = "Тест завершено!";
+      quizEl.innerHTML = `
+        <div class="result-box">
+          ${extraAnimation}
+          <h2>✅ ${level}</h2>
+          <p>${tip}</p>
+          <button onclick="restartQuiz()">Пройти тест заново</button>
+          <button onclick="window.location.href='/training_programs'"><i class="fas fa-dumbbell"></i> Перейти до програм</button>
+          <button onclick="window.location.href='/profile'"><i class="fas fa-home"></i> На головну</button>
+        </div>
+      `;
+    }
+
+    function restartQuiz() {
+      currentQuestion = 0;
+      score = 0;
+      showQuestion();
+    }
+
+    showQuestion();
+  </script>
+</body>
+</html>

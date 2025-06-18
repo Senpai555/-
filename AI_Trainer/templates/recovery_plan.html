@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ШІ-Тренер - План відновлення</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1593079831268-3381b0db4a77?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: auto;
+        }
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.1);
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+            z-index: 1;
+            margin: 20px 0;
+            transition: opacity 0.5s ease;
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        h1 i {
+            margin-right: 10px;
+            color: #34c759;
+        }
+        .welcome-text {
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+        .feeling-question {
+            margin-bottom: 20px;
+        }
+        .feeling-btn {
+            font-size: 1.5rem;
+            margin: 0 10px;
+            cursor: pointer;
+            transition: transform 0.3s ease, filter 0.3s ease, text-shadow 0.3s ease;
+        }
+        .feeling-btn:hover {
+            transform: scale(1.2);
+        }
+        .feeling-btn.active {
+            transform: scale(1.3);
+            filter: brightness(1.3);
+            text-shadow: 0 0 5px #34c759;
+        }
+        .feeling-feedback {
+            margin-top: 10px;
+            color: #34c759;
+            font-size: 0.9rem;
+        }
+        .intensity-slider {
+            width: 80%;
+            margin: 20px auto;
+        }
+        .intensity-slider input {
+            width: 100%;
+        }
+        .intensity-label {
+            font-size: 0.9rem;
+            margin-top: 5px;
+            color: #ccc;
+        }
+        .workout-notes {
+            margin: 20px 0;
+        }
+        .workout-notes label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .workout-notes textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            background: #222;
+            color: #fff;
+            resize: none;
+        }
+        .btn, .regen-btn, .reset-btn, .extra-advice-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+            margin: 5px;
+            position: relative;
+            animation: pulse 1.5s infinite;
+            cursor: pointer;
+        }
+        .btn, .regen-btn {
+            background: linear-gradient(135deg, #34c759, #28a745);
+        }
+        .extra-advice-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ff3b3b);
+            box-shadow: 0 2px 10px rgba(255, 107, 107, 0.5);
+        }
+        .reset-btn {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+            box-shadow: 0 2px 10px rgba(107, 114, 128, 0.5);
+        }
+        .btn:hover, .regen-btn:hover, .reset-btn:hover, .extra-advice-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+        .btn-subtitle {
+            font-size: 0.8rem;
+            color: #ccc;
+            margin-top: 5px;
+        }
+        .loading {
+            display: none;
+            font-size: 1rem;
+            margin-top: 20px;
+            color: #34c759;
+            animation: blink 1s infinite;
+        }
+        .recovery-plan {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(52, 199, 89, 0.3);
+            transition: opacity 0.5s ease;
+            animation: slideUp 0.6s ease-out;
+        }
+        .ai-tip, .daily-tip {
+            font-style: italic;
+            color: #ccc;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 rgba(52, 199, 89, 0.4); }
+            50% { box-shadow: 0 0 10px rgba(52, 199, 89, 0.7); }
+            100% { box-shadow: 0 0 0 rgba(52, 199, 89, 0.4); }
+        }
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div id="particles-js"></div>
+    <div class="container">
+        <h1><i class="fas fa-bed"></i>План відновлення</h1>
+        <p class="welcome-text">Дізнайся, як відновити сили після тренувань!</p>
+        <div class="feeling-question">
+            <p>Як ти почуваєшся після тренування?</p>
+            <span class="feeling-btn" onclick="adjustPlan('super')">💪 Супер</span>
+            <span class="feeling-btn" onclick="adjustPlan('normal')">😐 Нормально</span>
+            <span class="feeling-btn" onclick="adjustPlan('tired')">💤 Втомився</span>
+            <div id="feeling-feedback" class="feeling-feedback"></div>
+        </div>
+        <div class="intensity-slider">
+            <p>Оціни інтенсивність тренування</p>
+            <input type="range" min="0" max="10" value="5" id="intensity" oninput="updateIntensity()">
+            <div class="intensity-label" id="intensity-label">Середнє навантаження</div>
+        </div>
+        <div class="workout-notes">
+            <label for="workout-notes">Що ти тренував?</label>
+            <textarea id="workout-notes" placeholder="Наприклад: ноги, кардіо, спина, HIIT..." rows="3"></textarea>
+        </div>
+        <a href="#" class="btn" onclick="generatePlan(event)">Створити план відновлення</a>
+        <p class="btn-subtitle">Займе не більше 1 хвилини</p>
+        <div class="loading" id="loading">Аналізуємо твої дані...</div>
+        <div class="recovery-plan" id="recovery-plan"></div>
+        <div class="daily-tip" id="daily-tip"></div>
+        <button class="extra-advice-btn" onclick="getExtraAdvice()">Попросити у ШІ поради ще</button>
+        <button class="regen-btn" onclick="regeneratePlan()" style="display: none;">🔄 Згенерувати інший план</button>
+        
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script>
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: '#00f0ff' },
+                shape: { type: 'circle' },
+                opacity: { value: 0.5, random: true },
+                size: { value: 3, random: true },
+                line_linked: { enable: true, distance: 150, color: '#00f0ff', opacity: 0.4, width: 1 },
+                move: { enable: true, speed: 2, direction: 'none', random: false, straight: false, out_mode: 'out', bounce: false }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' }, resize: true },
+                modes: { repulse: { distance: 100, duration: 0.4 }, push: { particles_nb: 4 } }
+            },
+            retina_detect: true
+        });
+
+        let feeling = 'normal';
+        let intensity = 5;
+
+        // Поради дня
+        const dailyTips = [
+            '💬 Порада ШІ на сьогодні: лягай спати до 23:00 — це пришвидшує відновлення м’язів.',
+            '💬 Порада ШІ на сьогодні: випий склянку води з медом для енергії.',
+            '💬 Порада ШІ на сьогодні: зроби 5 хвилин розтяжки перед сном.',
+            '💬 Порада ШІ на сьогодні: додай до раціону ягоди — вони багаті антиоксидантами.',
+            '💬 Порада ШІ на сьогодні: провітри кімнату перед сном для кращого відпочинку.',
+            '💬 Порада ШІ на сьогодні: спробуй легкий масаж стоп після тренування.',
+            '💬 Порада ШІ на сьогодні: їж білкову їжу протягом 30 хвилин після тренування.',
+            '💬 Порада ШІ на сьогодні: зроби коротку медитацію для зняття стресу.',
+            '💬 Порада ШІ на сьогодні: тримайся подалі від екрану за годину до сну.',
+            '💬 Порада ШІ на сьогодні: додай до раціону авокадо — корисні жири для м’язів.'
+        ];
+
+        // Ментальні поради
+        const mentalTips = [
+            '🧘 Глибоке дихання 2 хв — відновить фокус після важкого дня.',
+            '🧘 Спробуй візуалізацію успіху на 3 хвилини перед сном.',
+            '🧘 Прослухай заспокійливу музику 5 хвилин для релаксу.',
+            '🧘 Зроби 1 хвилину подяки — це знизить стрес.',
+            '🧘 Спробуй техніку 4-7-8 для заспокоєння дихання.',
+            '🧘 Напиши 3 позитивні думки перед сном для ментального спокою.',
+            '🧘 Займися легким стретчінгом із закритими очима.',
+            '🧘 Сфокусуйся на одному приємному спогаді на 2 хвилини.',
+            '🧘 Спробуй прогресивне розслаблення м’язів по черзі.',
+            '🧘 Візьми 5 хвилин для усвідомленості — просто слухай навколишні звуки.'
+        ];
+
+        // Поради залежно від інтенсивності
+        const lightTips = [
+            '🤖 Порада ШІ: зроби легку прогулянку на 10 хвилин — це допоможе розслабити м’язи.',
+            '🤖 Порада ШІ: випий трав’яний чай (наприклад, ромашковий) для релаксу.',
+            '🤖 Порада ШІ: додай до раціону банан — він поповнить запаси калію.',
+            '🤖 Порада ШІ: спробуй легке дихання на 2 хвилини для зняття напруги.'
+        ];
+        const mediumTips = [
+            '🤖 Порада ШІ: спробуй контрастний душ (гарячий/холодний) — це покращить кровообіг.',
+            '🤖 Порада ШІ: додай магній (горіхи чи шпинат) — зменшить легку крепатуру.',
+            '🤖 Порада ШІ: зроби легкий масаж із кремом для м’язів.',
+            '🤖 Порада ШІ: випий склянку води з лимоном для детоксикації.'
+        ];
+        const heavyTips = [
+            '🤖 Порада ШІ: використовуй компресійні гольфи — допоможуть м’язам швидше відновитися.',
+            '🤖 Порада ШІ: додай у раціон продукти з омега-3 (лосось, насіння чіа) — зменшать біль.',
+            '🤖 Порада ШІ: зроби 10 хвилин медитації — знизить рівень кортизолу.',
+            '🤖 Порада ШІ: приклади холодний компрес на 5 хвилин для зняття запалення.'
+        ];
+
+        function updateIntensity() {
+            intensity = document.getElementById('intensity').value;
+            const label = document.getElementById('intensity-label');
+            if (intensity <= 3) label.textContent = 'Легка сесія';
+            else if (intensity <= 6) label.textContent = 'Середнє навантаження';
+            else label.textContent = 'Висока інтенсивність';
+        }
+
+        function adjustPlan(selectedFeeling) {
+            feeling = selectedFeeling;
+            let message = '';
+            if (feeling === 'super') message = 'Ти в чудовій формі! Легкий план відновлення.';
+            else if (feeling === 'normal') message = 'Нормально — стандартний план для тебе.';
+            else if (feeling === 'tired') message = 'Втомився? Додамо більше відпочинку.';
+            document.getElementById('feeling-feedback').textContent = message;
+
+            document.querySelectorAll('.feeling-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function generatePlan(event) {
+            event.preventDefault();
+            const loading = document.getElementById('loading');
+            const recoveryPlan = document.getElementById('recovery-plan');
+            const container = document.querySelector('.container');
+            const notes = document.getElementById('workout-notes').value.trim();
+            const regenBtn = document.querySelector('.regen-btn');
+            const resetBtn = document.querySelector('.reset-btn');
+
+            if (!notes) {
+                alert("Спочатку напиши, що ти тренував 🏋️‍♂️");
+                return;
+            }
+
+            loading.style.display = 'block';
+            container.style.opacity = '0.5';
+
+            setTimeout(() => {
+                let plan = '';
+                if (feeling === 'super') {
+                    plan = `Ти в чудовій формі після ${notes.toLowerCase()}! 1. Легка розтяжка: 2 хвилини. 2. Масаж: 5 хвилин. 3. Сон: 7 годин.`;
+                } else if (feeling === 'tired') {
+                    plan = `Втомився після ${notes.toLowerCase()}? 1. Розтяжка м’язів: 5 хвилин. 2. Масаж: 15 хвилин. 3. Сон: 9 годин.`;
+                } else {
+                    plan = `Добре попрацював над ${notes.toLowerCase()}! 1. Розтяжка: 3 хвилини. 2. Масаж: 10 хвилин. 3. Сон: 8 годин.`;
+                }
+
+                if (intensity > 6) {
+                    plan += ' Додай білковий коктейль для відновлення!';
+                }
+
+                let randomTip;
+                if (intensity <= 3) randomTip = lightTips[Math.floor(Math.random() * lightTips.length)];
+                else if (intensity <= 6) randomTip = mediumTips[Math.floor(Math.random() * mediumTips.length)];
+                else randomTip = heavyTips[Math.floor(Math.random() * heavyTips.length)];
+
+                loading.style.display = 'none';
+                recoveryPlan.style.display = 'block';
+                recoveryPlan.style.opacity = '1';
+                recoveryPlan.innerHTML = `<strong>Твій план:</strong><br>${plan}<p class="ai-tip">${randomTip}</p>`;
+                container.style.opacity = '1';
+                regenBtn.style.display = 'inline-block';
+                resetBtn.style.display = 'inline-block';
+                localStorage.setItem('lastRecoveryPlan', recoveryPlan.innerHTML);
+            }, 1500);
+        }
+
+        function regeneratePlan() {
+            const recoveryPlan = document.getElementById('recovery-plan');
+            const loading = document.getElementById('loading');
+            const container = document.querySelector('.container');
+            const notes = document.getElementById('workout-notes').value.trim();
+
+            loading.style.display = 'block';
+            container.style.opacity = '0.5';
+
+            setTimeout(() => {
+                let plan = '';
+                if (feeling === 'super') {
+                    plan = `Ти в чудовій формі після ${notes.toLowerCase()}! 1. Легка розтяжка: 2 хвилини. 2. Масаж: 5 хвилин. 3. Сон: 7 годин.`;
+                } else if (feeling === 'tired') {
+                    plan = `Втомився після ${notes.toLowerCase()}? 1. Розтяжка м’язів: 5 хвилин. 2. Масаж: 15 хвилин. 3. Сон: 9 годин.`;
+                } else {
+                    plan = `Добре попрацював над ${notes.toLowerCase()}! 1. Розтяжка: 3 хвилини. 2. Масаж: 10 хвилин. 3. Сон: 8 годин.`;
+                }
+
+                if (intensity > 6) {
+                    plan += ' Додай білковий коктейль для відновлення!';
+                }
+
+                let randomTip;
+                if (intensity <= 3) randomTip = lightTips[Math.floor(Math.random() * lightTips.length)];
+                else if (intensity <= 6) randomTip = mediumTips[Math.floor(Math.random() * mediumTips.length)];
+                else randomTip = heavyTips[Math.floor(Math.random() * heavyTips.length)];
+
+                loading.style.display = 'none';
+                recoveryPlan.style.display = 'block';
+                recoveryPlan.style.opacity = '1';
+                recoveryPlan.innerHTML = `<strong>Твій план:</strong><br>${plan}<p class="ai-tip">${randomTip}</p>`;
+                container.style.opacity = '1';
+                localStorage.setItem('lastRecoveryPlan', recoveryPlan.innerHTML);
+            }, 1500);
+        }
+
+        function getExtraAdvice() {
+            const recoveryPlan = document.getElementById('recovery-plan');
+            let randomMentalTip = mentalTips[Math.floor(Math.random() * mentalTips.length)];
+            recoveryPlan.innerHTML += `<p class="ai-tip">${randomMentalTip}</p>`;
+        }
+
+        function resetProfile() {
+            const recoveryPlan = document.getElementById('recovery-plan');
+            const regenBtn = document.querySelector('.regen-btn');
+            const resetBtn = document.querySelector('.reset-btn');
+            const extraAdviceBtn = document.querySelector('.extra-advice-btn');
+            recoveryPlan.style.display = 'none';
+            recoveryPlan.innerHTML = '';
+            regenBtn.style.display = 'none';
+            resetBtn.style.display = 'none';
+            extraAdviceBtn.style.display = 'inline-block';
+            localStorage.removeItem('lastRecoveryPlan');
+        }
+
+        window.onload = () => {
+            const saved = localStorage.getItem('lastRecoveryPlan');
+            const recoveryPlan = document.getElementById('recovery-plan');
+            const dailyTip = document.getElementById('daily-tip');
+            const regenBtn = document.querySelector('.regen-btn');
+            const resetBtn = document.querySelector('.reset-btn');
+            if (saved) {
+                recoveryPlan.innerHTML = saved;
+                recoveryPlan.style.display = 'block';
+                regenBtn.style.display = 'inline-block';
+                resetBtn.style.display = 'inline-block';
+            }
+            const randomDailyTip = dailyTips[Math.floor(Math.random() * dailyTips.length)];
+            dailyTip.textContent = randomDailyTip;
+        };
+    </script>
+</body>
+</html>

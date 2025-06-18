@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="{{ lang if lang else 'ua' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Віртуальна пробіжка з ШІ-Тренером: відстежуй дистанцію, калорії та досягнення в реальному часі!">
+    <title>Віртуальна пробіжка - ШІ-Тренер</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root {
+            --background-dark: linear-gradient(135deg, #1A2A44 0%, #0D0D1A 100%);
+            --accent-teal: #00FFD1;
+            --accent-purple: #A100FF;
+            --accent-gold: #FFD700;
+            --text-primary-dark: #E0E7FF;
+            --text-secondary: #A0AEC0;
+            --glass-bg-dark: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(0, 255, 209, 0.3);
+            --neon-glow: 0 0 10px #00FFD1, 0 0 20px #00FFD1, 0 0 30px #00FFD1;
+            --modal-bg: rgba(26, 42, 68, 0.95);
+            --modal-border: rgba(0, 255, 209, 0.5);
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px var(--accent-teal); }
+            50% { box-shadow: 0 0 20px var(--accent-teal); }
+            100% { box-shadow: 0 0 5px var(--accent-teal); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: 'Orbitron', sans-serif;
+            background: var(--background-dark);
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1593079831268-3381b0db4a77?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-primary-dark);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0.5rem auto;
+            padding: 0.75rem;
+            background: var(--glass-bg-dark);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--glass-border);
+            border-radius: 15px;
+            transition: background 0.5s ease;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        h1 {
+            color: var(--accent-teal);
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 0.75rem;
+            text-shadow: 0 0 10px #00FFD1, 0 0 20px #00FFD1;
+        }
+
+        .form-group {
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.2rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--glass-border);
+            border-radius: 5px;
+            background: var(--glass-bg-dark);
+            color: var(--text-primary-dark);
+            font-size: 0.95rem;
+            outline: none;
+            transition: box-shadow 0.3s;
+        }
+
+        input:focus {
+            box-shadow: var(--neon-glow);
+        }
+
+        .start-btn, .pause-btn, .finish-btn {
+            background: var(--accent-teal);
+            border: 1px solid var(--accent-teal);
+            padding: 0.75rem 1.5rem;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            margin: 0.5rem auto;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .start-btn:hover, .pause-btn:hover, .finish-btn:hover {
+            box-shadow: var(--neon-glow);
+            transform: scale(1.05);
+        }
+
+        .progress {
+            width: 100%;
+            height: 20px;
+            border-radius: 5px;
+            background: var(--glass-bg-dark);
+            border: 1px solid var(--glass-border);
+            margin-top: 0.5rem;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--accent-teal);
+            border-radius: 5px;
+            transition: width 1s;
+        }
+
+        #map {
+            height: 400px;
+            width: 100%;
+            margin-top: 0.75rem;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .stat-card {
+            background: var(--glass-bg-dark);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 0.5rem;
+            text-align: center;
+            margin: 0.5rem;
+            display: inline-block;
+            width: 150px;
+        }
+
+        #achievements .achievement {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .map-runner-video {
+            width: 40px;
+            height: 40px;
+            background: var(--accent-teal);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-primary-dark);
+            font-weight: bold;
+        }
+
+        #advice, #history {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: var(--glass-bg-dark);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--text-primary-dark);
+        }
+
+        .back-button, .clear-history-btn {
+            padding: 0.5rem 1rem;
+            color: var(--accent-gold);
+            cursor: pointer;
+            border: 1px solid var(--glass-border);
+            border-radius: 5px;
+            background: var(--accent-purple);
+            text-align: center;
+            margin-top: 0.75rem;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover, .clear-history-btn:hover {
+            box-shadow: var(--neon-glow);
+            transform: scale(1.05);
+        }
+
+        .clear-history-btn {
+            background: #FF4444;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--modal-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 2px solid var(--modal-border);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 0 20px rgba(0, 255, 209, 0.3), 0 0 40px rgba(0, 255, 209, 0.1);
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .modal-content h2 {
+            color: var(--accent-teal);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 5px #00FFD1;
+        }
+
+        .modal-content p {
+            color: var(--text-primary-dark);
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .modal-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn.confirm {
+            background: var(--accent-teal);
+            color: white;
+        }
+
+        .modal-btn.cancel {
+            background: var(--accent-purple);
+            color: var(--accent-gold);
+        }
+
+        .modal-btn:hover {
+            transform: scale(1.05);
+            box-shadow: var(--neon-glow);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0.5rem;
+                margin: 0.25rem;
+            }
+            #map {
+                height: 300px;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            .start-btn, .pause-btn, .finish-btn {
+                font-size: 1rem;
+            }
+            .modal-content {
+                padding: 1.5rem;
+                max-width: 300px;
+            }
+            .modal-content h2 {
+                font-size: 1.2rem;
+            }
+            .modal-content p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Віртуальна пробіжка</h1>
+        <div class="form-group">
+            <label for="weight">Ваша вага (кг) 🏋️<span class="tooltip top">Вага впливає на калорії</span></label>
+            <input type="number" id="weight" placeholder="Введи свою вагу" min="30" max="200">
+        </div>
+        <button class="start-btn" id="start-btn" onclick="startRun()" disabled><i data-lucide="play"></i> Почати біг</button>
+        <button class="pause-btn" id="pause-btn" onclick="pauseRun()" style="display: none;"><i data-lucide="pause"></i> Пауза</button>
+        <button class="finish-btn" id="finish-btn" onclick="finishRun()" style="display: none;"><i data-lucide="stop-circle"></i> Закончити біг</button>
+        <div class="progress">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <p>Час: <span id="time">0:00</span></p>
+        <p>Дистанція: <span id="distance-run">0</span> км</p>
+        <div id="map"></div>
+        <div id="stats">
+            <div class="stat-card"><h4>Калорії</h4><p><span id="calories">0</span> ккал</p></div>
+            <div class="stat-card"><h4>Бали</h4><p><span id="points">0</span></p></div>
+            <h2>Досягнення</h2>
+            <div id="achievements"></div>
+        </div>
+        <div id="advice">
+            <h2>Поради</h2>
+        </div>
+        <div id="history">
+            <h2>Історія пробіжок</h2>
+            <ul id="run-list"></ul>
+            <button class="clear-history-btn" onclick="showClearModal()">Очистити історію</button>
+        </div>
+        <button class="back-button" onclick="window.location.href='/profile'">Назад до меню</button>
+    </div>
+
+    <div id="clearModal" class="modal">
+        <div class="modal-content">
+            <h2>Підтвердження</h2>
+            <p>Ви впевнені, що хочете видалити всю історію пробіжок?</p>
+            <div class="modal-buttons">
+                <button class="modal-btn confirm" onclick="confirmClear()">Так</button>
+                <button class="modal-btn cancel" onclick="hideClearModal()">Ні</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script>
+        lucide.createIcons();
+
+        var map = L.map('map').setView([51.505, -0.09], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        let marker, polyline, lat = null, lon = null, watchId, lastLat = null, lastLon = null, isSimulated = false;
+        let timerInterval, animationInterval, progressInterval, positionUpdateInterval;
+        let seconds = 0;
+        let isRunning = false;
+        let isPaused = false;
+        let distanceRun = 0;
+        let targetDistance = 5;
+        let lastPositionTime = 0;
+
+        const clearModal = document.getElementById('clearModal');
+
+        function showClearModal() {
+            clearModal.style.display = 'flex';
+        }
+
+        function hideClearModal() {
+            clearModal.style.display = 'none';
+        }
+
+        function confirmClear() {
+            localStorage.removeItem('runs');
+            localStorage.removeItem('achievements');
+            const list = document.getElementById('run-list');
+            list.innerHTML = '';
+            document.getElementById('achievements').innerHTML = '';
+            alert('Історія успішно очищена!');
+            hideClearModal();
+        }
+
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                lat = position.coords.latitude;
+                lon = position.coords.longitude;
+                map.setView([lat, lon], 16); // Збільшено з 13 до 16 для детальнішого масштабу
+                marker = L.marker([lat, lon], {
+                    icon: L.divIcon({
+                        className: 'map-runner-video',
+                        html: '<div>🏃</div>'
+                    })
+                }).addTo(map);
+                polyline = L.polyline([[lat, lon]], {color: 'red'}).addTo(map);
+                watchId = navigator.geolocation.watchPosition(updatePosition, handleGeoError, {
+                    enableHighAccuracy: true,
+                    timeout: 5000, // Чекаємо до 5 секунд на точніші дані
+                    maximumAge: 0 // Використовуємо лише свіжі дані
+                });
+                // Додаткове періодичне оновлення
+                positionUpdateInterval = setInterval(() => {
+                    if (isRunning && !isPaused) {
+                        navigator.geolocation.getCurrentPosition(updatePosition, handleGeoError, {
+                            enableHighAccuracy: true,
+                            timeout: 5000,
+                            maximumAge: 0
+                        });
+                    }
+                }, 2000); // Оновлення кожні 2 секунди
+                document.getElementById('start-btn').disabled = false;
+            }, handleGeoError, {
+                enableHighAccuracy: true,
+                timeout: 5000,
+                maximumAge: 0
+            });
+        } else {
+            map.setView([50.4501, 30.5234], 13);
+            alert('Геолокація не підтримується вашим браузером. Використано симуляцію.');
+            isSimulated = true;
+            animateRun();
+        }
+
+        function handleGeoError(error) {
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    alert('Геолокація відхилена. Використано симуляцію.');
+                    isSimulated = true;
+                    animateRun();
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    alert('Дані геолокації недоступні. Використано симуляцію.');
+                    isSimulated = true;
+                    animateRun();
+                    break;
+                case error.TIMEOUT:
+                    alert('Таймаут запиту геолокації. Використано симуляцію.');
+                    isSimulated = true;
+                    animateRun();
+                    break;
+            }
+        }
+
+        function updatePosition(position) {
+            if (isRunning && !isPaused && lat !== null && lon !== null) {
+                const currentTime = Date.now();
+                if (currentTime - lastPositionTime < 1000) return; // Фільтр для уникнення надто частого оновлення
+                lastPositionTime = currentTime;
+
+                const newLat = position.coords.latitude;
+                const newLon = position.coords.longitude;
+                const accuracy = position.coords.accuracy; // Точність у метрах
+
+                // Перевіряємо, чи точність достатня (наприклад, < 10 метрів)
+                if (accuracy < 10) {
+                    if (lastLat !== null && lastLon !== null) {
+                        const dist = map.distance([lastLat, lastLon], [newLat, newLon]) / 1000;
+                        if (dist > 0.001) { // Ігноруємо дуже малі рухи (< 1 метр)
+                            distanceRun += dist;
+                            document.getElementById('distance-run').textContent = distanceRun.toFixed(2);
+                            polyline.addLatLng([newLat, newLon]);
+                        }
+                    }
+                    lat = newLat;
+                    lon = newLon;
+                    marker.setLatLng([lat, lon]);
+                    lastLat = lat;
+                    lastLon = lon;
+                    map.panTo([lat, lon], { animate: true, duration: 0.5 });
+                } else {
+                    console.log(`Точність: ${accuracy}m, недостатня для оновлення.`);
+                }
+            }
+        }
+
+        function startRun() {
+            if (isRunning || lat === null || lon === null) {
+                if (lat === null || lon === null) {
+                    alert('Геолокація ще не завантажилась. Спробуй через кілька секунд.');
+                }
+                return;
+            }
+            isRunning = true;
+            isPaused = false;
+            distanceRun = 0;
+            lastLat = lat;
+            lastLon = lon;
+            seconds = 0;
+            document.getElementById('progress-bar').style.width = '0%';
+            document.getElementById('time').textContent = '0:00';
+            document.getElementById('distance-run').textContent = '0';
+
+            timerInterval = setInterval(() => {
+                if (!isPaused) {
+                    seconds++;
+                    document.getElementById('time').textContent = `${Math.floor(seconds / 60)}:${seconds % 60 < 10 ? '0' : ''}${seconds % 60}`;
+                }
+            }, 1000);
+
+            progressInterval = setInterval(() => {
+                if (!isPaused) {
+                    let progress = (distanceRun / targetDistance) * 100;
+                    document.getElementById('progress-bar').style.width = Math.min(progress, 100) + '%';
+                    if (progress >= 100) clearInterval(progressInterval);
+                }
+            }, 1000);
+
+            if (isSimulated) animateRun();
+
+            document.getElementById('pause-btn').style.display = 'block';
+            document.getElementById('finish-btn').style.display = 'block';
+            document.getElementById('start-btn').style.display = 'none';
+        }
+
+        function animateRun() {
+            if (!isRunning || isPaused) return;
+            let steps = 500;
+            let stepLat = (Math.random() - 0.5) * 0.01 / steps;
+            let stepLon = (Math.random() - 0.5) * 0.01 / steps;
+            let currentStep = 0;
+
+            function step() {
+                if (currentStep < steps && !isPaused) {
+                    lat += stepLat;
+                    lon += stepLon;
+                    marker.setLatLng([lat, lon]);
+                    let dist = map.distance(polyline.getLatLngs().slice(-1)[0], [lat, lon]) / 1000;
+                    distanceRun += dist;
+                    document.getElementById('distance-run').textContent = distanceRun.toFixed(2);
+                    polyline.addLatLng([lat, lon]);
+                    map.panTo([lat, lon], { animate: true, duration: 0.5 });
+                    currentStep++;
+                    animationInterval = setTimeout(step, 100);
+                } else if (currentStep >= steps && !isPaused) {
+                    finishRun();
+                }
+            }
+            step();
+        }
+
+        function pauseRun() {
+            isPaused = !isPaused;
+            const pauseBtn = document.getElementById('pause-btn');
+            pauseBtn.innerHTML = `<i data-lucide="${isPaused ? 'play' : 'pause'}"></i> ${isPaused ? 'Продовжити' : 'Пауза'}`;
+            lucide.createIcons(pauseBtn);
+        }
+
+        function finishRun() {
+            clearInterval(timerInterval);
+            if (animationInterval) clearTimeout(animationInterval);
+            if (progressInterval) clearInterval(progressInterval);
+            if (positionUpdateInterval) clearInterval(positionUpdateInterval);
+            if (watchId) navigator.geolocation.clearWatch(watchId);
+            isRunning = false;
+            let weight = parseFloat(document.getElementById('weight').value) || 70;
+            let calories = distanceRun * weight * 0.75;
+            let points = Math.round(distanceRun);
+            document.getElementById('calories').textContent = Math.round(calories);
+            document.getElementById('points').textContent = points;
+            saveRun(distanceRun, calories, seconds);
+            checkAchievements(points);
+            updateAdvice();
+            document.getElementById('advice').innerHTML += '<br><strong>Молодець!</strong> Ти пробіг ' + distanceRun.toFixed(2) + ' км, відпочинь!';
+            document.getElementById('pause-btn').style.display = 'none';
+            document.getElementById('finish-btn').style.display = 'none';
+            document.getElementById('start-btn').style.display = 'block';
+            map.setView([lat, lon], 13);
+        }
+
+        function saveRun(distance, calories, time) {
+            let runs = JSON.parse(localStorage.getItem('runs')) || [];
+            runs.push({ distance: distance.toFixed(2), calories, time, date: new Date().toLocaleString() });
+            localStorage.setItem('runs', JSON.stringify(runs));
+            loadRunHistory();
+        }
+
+        function loadRunHistory() {
+            const runs = JSON.parse(localStorage.getItem('runs')) || [];
+            const list = document.getElementById('run-list');
+            list.innerHTML = runs.map(run => `
+                <li>${run.date}: ${run.distance} км – ${run.calories} ккал – ${Math.floor(run.time / 60)} хв ${run.time % 60 < 10 ? '0' : ''}${run.time % 60} сек</li>
+            `).join('');
+            loadAchievements();
+        }
+
+        function loadAchievements() {
+            const achievements = JSON.parse(localStorage.getItem('achievements')) || {};
+            const achievementsDiv = document.getElementById('achievements');
+            achievementsDiv.innerHTML = '';
+            if (achievements.bronze) achievementsDiv.innerHTML += '<div class="achievement"><i data-lucide="award"></i> Відкрив 🥉 Бронзового Бігуна!</div>';
+            if (achievements.silver) achievementsDiv.innerHTML += '<div class="achievement"><i data-lucide="award"></i> Відкрив 🥈 Срібного Бігуна!</div>';
+            if (achievements.gold) achievementsDiv.innerHTML += '<div class="achievement"><i data-lucide="award"></i> Відкрив 🥇 Золотого Бігуна!</div>';
+            lucide.createIcons();
+        }
+        window.onload = function() {
+            loadRunHistory();
+        };
+
+        function updateAdvice() {
+            const runs = JSON.parse(localStorage.getItem('runs')) || [];
+            if (runs.length >= 5) {
+                document.getElementById('advice').innerHTML += '<p>🔥 Ти вже пробіг більше 5 разів! Тримай темп!</p>';
+            }
+            let advice = distanceRun > 3 ? 'Відмінна дистанція! Додай розтяжку.' : 'Добре, але спробуй збільшити дистанцію!';
+            document.getElementById('advice').innerHTML = '<strong>Порада:</strong> ' + advice;
+        }
+
+        function checkAchievements(points) {
+            let achievements = JSON.parse(localStorage.getItem('achievements')) || {};
+            let updated = false;
+
+            if (points >= 10 && !achievements.bronze) {
+                achievements.bronze = true;
+                updated = true;
+            }
+            if (points >= 25 && !achievements.silver) {
+                achievements.silver = true;
+                updated = true;
+            }
+            if (points >= 50 && !achievements.gold) {
+                achievements.gold = true;
+                updated = true;
+            }
+
+            if (updated) {
+                localStorage.setItem('achievements', JSON.stringify(achievements));
+                loadAchievements();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Прогноз прогресу</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <style>
+        :root {
+            --background-dark: linear-gradient(135deg, #1A2A44 0%, #0D0D1A 100%);
+            --accent-teal: #00FFD1;
+            --accent-purple: #A100FF;
+            --accent-gold: #FFD700;
+            --text-primary-dark: #E0E7FF;
+            --text-secondary: #A0AEC0;
+            --glass-bg-dark: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(0, 255, 209, 0.3);
+            --neon-glow: 0 0 10px #00FFD1, 0 0 20px #00FFD1, 0 0 30px #00FFD1;
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px var(--accent-teal); }
+            50% { box-shadow: 0 0 20px var(--accent-teal); }
+            100% { box-shadow: 0 0 5px var(--accent-teal); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes glow-pulse {
+            0% { box-shadow: 0 0 5px #FFD700; }
+            50% { box-shadow: 0 0 20px #FFD700; }
+            100% { box-shadow: 0 0 5px #FFD700; }
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: 'Orbitron', sans-serif;
+            background: var(--background-dark);
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1593079831268-3381b0db4a77?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-primary-dark);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0.5rem auto;
+            padding: 0.75rem;
+            background: var(--glass-bg-dark);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--glass-border);
+            border-radius: 15px;
+            transition: background 0.5s ease;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        h1 {
+            color: var(--accent-teal);
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 0.75rem;
+            text-shadow: 0 0 10px #00FFD1, 0 0 20px #00FFD1;
+        }
+
+        .form-group {
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.2rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--glass-border);
+            border-radius: 5px;
+            background: var(--glass-bg-dark);
+            color: var(--text-primary-dark);
+            font-size: 0.95rem;
+            outline: none;
+            transition: box-shadow 0.3s;
+        }
+
+        input:focus, select:focus {
+            box-shadow: var(--neon-glow);
+        }
+
+        .checkbox-group, .range-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .checkbox-group input, .range-group input {
+            width: auto;
+        }
+
+        .range-group input[type="range"] {
+            width: 200px;
+        }
+
+        .forecast-button {
+            background: var(--accent-teal);
+            border: 1px solid var(--accent-teal);
+            padding: 0.75rem 1.5rem;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
+            margin: 0.5rem auto;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .forecast-button:hover {
+            box-shadow: var(--neon-glow);
+            transform: scale(1.05);
+        }
+
+        .progress-container {
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        .progress-container label {
+            display: inline-block;
+            color: var(--accent-gold);
+            margin-bottom: 0.2rem;
+        }
+
+        progress {
+            width: 100%;
+            height: 20px;
+            border-radius: 5px;
+            background: var(--glass-bg-dark);
+            border: 1px solid var(--glass-border);
+        }
+
+        progress::-webkit-progress-bar {
+            background: var(--glass-bg-dark);
+            border-radius: 5px;
+        }
+
+        progress::-webkit-progress-value {
+            background: var(--accent-teal);
+            border-radius: 5px;
+        }
+
+        progress::-moz-progress-bar {
+            background: var(--accent-teal);
+            border-radius: 5px;
+        }
+
+        .chart-container {
+            margin-top: 0.75rem;
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
+
+        .ai-comment, .recommendations, .pace-indicator, .motivation-message {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: var(--glass-bg-dark);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            color: var(--text-primary-dark);
+        }
+
+        .recommendations ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+        }
+
+        .pace-indicator {
+            text-align: center;
+            color: var(--accent-gold);
+        }
+
+        .motivation-message {
+            text-align: center;
+            color: var(--accent-teal);
+            animation: fadeInUp 1s ease-out, glow 2s infinite;
+        }
+
+        .target-date {
+            margin-top: 0.5rem;
+            text-align: center;
+            color: var(--accent-gold);
+        }
+
+        .back-button {
+            padding: 0.5rem 1rem;
+            color: var(--accent-gold);
+            cursor: pointer;
+            border: 1px solid var(--glass-border);
+            border-radius: 5px;
+            background: var(--accent-purple);
+            text-align: center;
+            margin-top: 0.75rem;
+            margin-bottom: 0.25rem;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            box-shadow: var(--neon-glow);
+            transform: scale(1.05);
+        }
+
+        .updated {
+            animation: glow-pulse 1.5s ease-out;
+        }
+
+        .clear-button {
+            background: var(--accent-purple);
+            border: 1px solid var(--glass-border);
+            padding: 0.5rem 1rem;
+            color: var(--accent-gold);
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .clear-button:hover {
+            box-shadow: var(--neon-glow);
+            transform: scale(1.05);
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(26, 42, 68, 0.9);
+            color: var(--text-primary-dark);
+            padding: 0.4rem 0.8rem;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .form-group:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .tooltip.top {
+            top: -2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .tooltip.bottom {
+            bottom: -2.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .tooltip.left {
+            top: 50%;
+            right: 100%;
+            transform: translateY(-50%);
+        }
+
+        .tooltip.right {
+            top: 50%;
+            left: 100%;
+            transform: translateY(-50%);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0.5rem;
+                margin: 0.25rem;
+            }
+            .chart-container {
+                height: 300px;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            .forecast-button {
+                font-size: 1rem;
+            }
+            .tooltip {
+                font-size: 0.75rem;
+                padding: 0.3rem 0.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="clear-button" onclick="clearData()">Очистити дані</button>
+        <h1>Прогноз прогресу</h1>
+        <div class="form-group">
+            <label for="age">Вік (роки) 🕒<span class="tooltip top">Вік впливає на базовий метаболізм</span></label>
+            <input type="number" id="age" placeholder="Введи свій вік">
+        </div>
+        <div class="form-group">
+            <label for="height">Зріст (см) 📏<span class="tooltip top">Висота тіла для точного BMR</span></label>
+            <input type="number" id="height" placeholder="Введи свій зріст">
+        </div>
+        <div class="form-group">
+            <label for="gender">Стать 👤<span class="tooltip top">Вибір статі для корекції BMR</span></label>
+            <select id="gender">
+                <option value="male">Чоловік</option>
+                <option value="female">Жінка</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="currentWeight">Поточна вага (кг) 🏋️<span class="tooltip top">Ваша поточна вага для прогнозу</span></label>
+            <input type="number" id="currentWeight" placeholder="Введи поточну вагу">
+        </div>
+        <div class="form-group">
+            <label for="targetWeight">Бажана вага (кг) 🎯<span class="tooltip top">Мета, до якої прагнете</span></label>
+            <input type="number" id="targetWeight" placeholder="Введи бажану вагу">
+        </div>
+        <div class="form-group">
+            <label for="currentCalories">Поточна калорійність (ккал/день) 🔥<span class="tooltip top">Скільки калорій ви споживаєте щодня</span></label>
+            <input type="number" id="currentCalories" placeholder="Введи поточну калорійність">
+        </div>
+        <div class="form-group">
+            <label for="targetCalories">Цільова калорійність (ккал/день) 🍽️<span class="tooltip top">Планова калорійність для мети</span></label>
+            <input type="number" id="targetCalories" placeholder="Vведи цільову калорійність">
+        </div>
+        <div class="form-group">
+            <label for="workoutsPerWeek">Тренувань на тиждень 💪<span class="tooltip top">Кількість тренувань впливає на витрати калорій</span></label>
+            <input type="number" id="workoutsPerWeek" placeholder="Введи кількість тренувань на тиждень">
+        </div>
+        <div class="form-group">
+            <label for="weeklyWeight">Вага цього тижня (кг) ⚖️<span class="tooltip top">Оновлюйте вагу щотижня для точності</span></label>
+            <div class="flex gap-2">
+                <input type="number" id="weeklyWeight" placeholder="Введи вагу цього тижня">
+                <button class="forecast-button text-sm py-2" onclick="addWeeklyWeight()">Зберегти вагу</button>
+            </div>
+        </div>
+        <div class="checkbox-group">
+            <input type="checkbox" id="simulateExtraWorkout">
+            <label for="simulateExtraWorkout">Додати ще 1 тренування/тиждень 💥</label>
+        </div>
+        <div class="range-group">
+            <label for="simCal">Симуляція: зміна калорій на 🌡️</label>
+            <input type="range" id="simCal" min="-500" max="500" step="50" value="0">
+            <span id="simCalValue">0</span> ккал
+        </div>
+        <button class="forecast-button" onclick="calculateForecast()">Прогноз прогресу</button>
+        <div class="progress-container">
+            <label id="progressLabel">🔋 Прогрес: 0% до цілі</label>
+            <progress id="progressBar" value="0" max="100"></progress>
+        </div>
+        <div class="chart-container">
+            <canvas id="progressChart"></canvas>
+        </div>
+        <div class="target-date" id="targetDate"></div>
+        <div class="ai-comment" id="aiComment"></div>
+        <div class="pace-indicator" id="paceIndicator"></div>
+        <div class="recommendations" id="recommendations">
+            <h3>Рекомендації:</h3>
+            <ul id="recommendationsList"></ul>
+        </div>
+        <div class="motivation-message" id="motivationMessage"></div>
+        <button class="back-button" onclick="window.location.href='/profile'">Назад до меню</button>
+    </div>
+
+    <script>
+        let chart = null;
+        let initialWeight = null;
+        let weightHistory = [];
+        let forecastData = [];
+        let targetWeightValue = null;
+
+        const { Chart } = window;
+        if (typeof window.ChartAnnotation !== 'undefined') {
+            Chart.register(window.ChartAnnotation);
+        } else {
+            console.warn('ChartAnnotation плагін не завантажено. Анотації на графіку будуть відключені.');
+        }
+
+        const ctx = document.getElementById('progressChart').getContext('2d');
+
+        const motivationalQuotes = [
+            "Ти сильніший, ніж думаєш! Продовжуй рухатися вперед! 💪",
+            "Кожен крок наближає тебе до мети! 🌟",
+            "Твоя відданість вражає — тримай темп! 🔥",
+            "Маленькі перемоги — це твій шлях до успіху! 🎉"
+        ];
+
+        function showToast(message, callback) {
+            const toast = document.createElement('div');
+            toast.textContent = message;
+            toast.style.cssText = `
+                position: fixed; bottom: 20px; right: 20px;
+                background: #00FFD1; color: black; padding: 10px 20px;
+                border-radius: 8px; font-weight: bold; z-index: 9999;
+                box-shadow: 0 0 10px #00FFD1;
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+                if (callback) callback();
+            }, 3000);
+        }
+
+        function clearData() {
+            try {
+                localStorage.removeItem('progressForecastData');
+                showToast('✅ Дані очищено!', () => {
+                    location.reload();
+                });
+            } catch (error) {
+                console.error('Помилка при очищенні даних:', error);
+                showToast('❌ Помилка при очищенні даних');
+            }
+        }
+
+        function loadData() {
+            const savedData = JSON.parse(localStorage.getItem('progressForecastData')) || {};
+            document.getElementById('age').value = savedData.age || '';
+            document.getElementById('height').value = savedData.height || '';
+            document.getElementById('gender').value = savedData.gender || 'male';
+            document.getElementById('currentWeight').value = savedData.currentWeight || '';
+            document.getElementById('targetWeight').value = savedData.targetWeight || '';
+            document.getElementById('currentCalories').value = savedData.currentCalories || '';
+            document.getElementById('targetCalories').value = savedData.targetCalories || '';
+            document.getElementById('workoutsPerWeek').value = savedData.workoutsPerWeek || '';
+            initialWeight = savedData.initialWeight || null;
+            weightHistory = savedData.weightHistory || [];
+            if (savedData.chartData) {
+                forecastData = savedData.chartData.data;
+                renderChart(savedData.chartData.labels, savedData.chartData.data, savedData.actualData || []);
+                document.getElementById('targetDate').textContent = savedData.targetDate || '';
+                document.getElementById('aiComment').textContent = savedData.aiComment || '';
+                document.getElementById('paceIndicator').textContent = savedData.paceIndicator || '';
+                document.getElementById('recommendationsList').innerHTML = savedData.recommendations || '';
+                document.getElementById('motivationMessage').textContent = savedData.motivationMessage || '';
+            }
+            updateProgressBar();
+            document.getElementById('motivationMessage').textContent = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
+        }
+
+        function saveData() {
+            const actualData = weightHistory.map(entry => entry.weight);
+            const data = {
+                age: document.getElementById('age').value,
+                height: document.getElementById('height').value,
+                gender: document.getElementById('gender').value,
+                currentWeight: document.getElementById('currentWeight').value,
+                targetWeight: document.getElementById('targetWeight').value,
+                currentCalories: document.getElementById('currentCalories').value,
+                targetCalories: document.getElementById('targetCalories').value,
+                workoutsPerWeek: document.getElementById('workoutsPerWeek').value,
+                initialWeight: initialWeight,
+                weightHistory: weightHistory,
+                chartData: chart ? { labels: chart.data.labels, data: chart.data.datasets[0].data } : null,
+                actualData: chart && chart.data.datasets[1] ? chart.data.datasets[1].data : [],
+                targetDate: document.getElementById('targetDate').textContent,
+                aiComment: document.getElementById('aiComment').textContent,
+                paceIndicator: document.getElementById('paceIndicator').textContent,
+                recommendations: document.getElementById('recommendationsList').innerHTML,
+                motivationMessage: document.getElementById('motivationMessage').textContent
+            };
+            localStorage.setItem('progressForecastData', JSON.stringify(data));
+        }
+
+        function addWeeklyWeight() {
+            const weeklyWeight = parseFloat(document.getElementById('weeklyWeight').value);
+            if (!weeklyWeight) {
+                console.log('Вага цього тижня не введена.');
+                return;
+            }
+            const week = weightHistory.length + 1;
+            weightHistory.push({ week: week, weight: weeklyWeight });
+            document.getElementById('weeklyWeight').value = '';
+            document.getElementById('currentWeight').value = weeklyWeight;
+            updateProgressBar();
+
+            const progressBar = document.getElementById('progressBar');
+            progressBar.classList.add('updated');
+            setTimeout(() => {
+                progressBar.classList.remove('updated');
+            }, 1500);
+            calculateForecast();
+            showToast('✅ Вагу збережено!');
+        }
+
+        function updateProgressBar() {
+            const currentWeight = parseFloat(document.getElementById('currentWeight').value);
+            const targetWeight = parseFloat(document.getElementById('targetWeight').value);
+            if (!initialWeight) initialWeight = currentWeight;
+            if (!currentWeight || !targetWeight || !initialWeight) {
+                console.log('Не вистачає даних для прогрес-бару:', { currentWeight, targetWeight, initialWeight });
+                return;
+            }
+
+            const totalChange = initialWeight - targetWeight;
+            const currentChange = initialWeight - currentWeight;
+            let progress = (currentChange / totalChange) * 100;
+            progress = totalChange < 0 ? 100 - progress : progress;
+            progress = Math.min(Math.max(progress, 0), 100);
+            document.getElementById('progressBar').value = progress;
+            document.getElementById('progressLabel').textContent = `🔋 Прогрес: ${progress.toFixed(1)}% до цілі`;
+        }
+
+        function calculateBMR(weight, height, age, gender) {
+            if (gender === 'male') {
+                return 10 * weight + 6.25 * height - 5 * age + 5;
+            } else {
+                return 10 * weight + 6.25 * height - 5 * age - 161;
+            }
+        }
+
+        function calculateForecast() {
+            const age = parseInt(document.getElementById('age').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const gender = document.getElementById('gender').value;
+            let currentWeight = parseFloat(document.getElementById('currentWeight').value);
+            const targetWeight = parseFloat(document.getElementById('targetWeight').value);
+            const currentCalories = parseFloat(document.getElementById('currentCalories').value);
+            let targetCalories = parseFloat(document.getElementById('targetCalories').value);
+            let workoutsPerWeek = parseInt(document.getElementById('workoutsPerWeek').value);
+            const simulateExtraWorkout = document.getElementById('simulateExtraWorkout').checked;
+            const simCal = parseInt(document.getElementById('simCal').value);
+            const aiComment = document.getElementById('aiComment');
+            const targetDateEl = document.getElementById('targetDate');
+            const paceIndicator = document.getElementById('paceIndicator');
+            const recommendationsList = document.getElementById('recommendationsList');
+            const motivationMessage = document.getElementById('motivationMessage');
+
+            console.log('Введені дані:', {
+                age, height, gender, currentWeight, targetWeight,
+                currentCalories, targetCalories, workoutsPerWeek, simCal
+            });
+
+            if (!age || !height || !currentWeight || !targetWeight || !currentCalories || !targetCalories || !workoutsPerWeek) {
+                aiComment.textContent = 'Будь ласка, заповни всі поля.';
+                console.log('Не всі поля заповнені.');
+                return;
+            }
+
+            if (initialWeight === null) initialWeight = currentWeight;
+            updateProgressBar();
+
+            if (simulateExtraWorkout) workoutsPerWeek += 1;
+            targetCalories += simCal;
+            const extraCaloriesBurned = simulateExtraWorkout ? 200 : 0;
+            let calorieDeficit = currentCalories - targetCalories + extraCaloriesBurned;
+            if (calorieDeficit === 0) {
+                aiComment.textContent = 'Дефіцит калорій не може бути 0. Зміни калорійність або додай активність.';
+                console.log('Дефіцит калорій = 0.');
+                return;
+            }
+
+            const weeks = 24;
+            const labels = Array.from({ length: weeks + 1 }, (_, i) => i);
+            const data = [];
+            let current = currentWeight;
+            let weeksToTarget = 0;
+
+            for (let i = 0; i <= weeks; i++) {
+                data.push(current);
+                const bmr = calculateBMR(current, height, age, gender);
+                const activityFactor = 1.2 + (workoutsPerWeek * 0.1);
+                const tdee = bmr * activityFactor;
+                const adjustedDeficit = calorieDeficit > 0 ? calorieDeficit : -calorieDeficit;
+                const weightChange = (adjustedDeficit * 7) / 7700;
+                current = calorieDeficit > 0 ? current - weightChange : current + weightChange;
+
+                if (calorieDeficit > 0 && current <= targetWeight) {
+                    weeksToTarget = i;
+                    break;
+                }
+                if (calorieDeficit < 0 && current >= targetWeight) {
+                    weeksToTarget = i;
+                    break;
+                }
+            }
+
+            forecastData = data;
+            targetWeightValue = targetWeight;
+
+            const today = new Date();
+            const targetDate = new Date();
+            targetDate.setDate(today.getDate() + weeksToTarget * 7);
+            const targetDateStr = targetDate.toLocaleDateString('uk-UA', { day: 'numeric', month: 'long', year: 'numeric' });
+            targetDateEl.textContent = `📅 Очікувана дата досягнення мети: ${targetDateStr}`;
+
+            if (weightHistory.length > 0) {
+                const currentWeek = weightHistory.length;
+                const actualWeight = weightHistory[currentWeek - 1].weight;
+                const forecastWeight = forecastData[currentWeek] || forecastData[forecastData.length - 1];
+                const difference = actualWeight - forecastWeight;
+                if (difference < 0) {
+                    paceIndicator.textContent = `🔺 Ти випереджаєш план на ${Math.abs(difference).toFixed(1)} кг`;
+                } else if (difference > 0) {
+                    paceIndicator.textContent = `🔻 Ти відстаєш від плану на ${difference.toFixed(1)} кг`;
+                } else {
+                    paceIndicator.textContent = `✅ Ти йдеш за планом!`;
+                }
+            } else {
+                paceIndicator.textContent = '';
+            }
+
+            motivationMessage.textContent = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
+
+            const actualData = weightHistory.map(entry => entry.weight);
+            renderChart(labels.slice(0, data.length), data, actualData, weeksToTarget);
+
+            const bmr = calculateBMR(currentWeight, height, age, gender);
+            const tempComment = `Твій BMR: ${bmr.toFixed(0)} ккал. Прогноз: досягнення цілі за ${weeksToTarget} тижнів.`;
+            const tempRecommendations = [
+                "- Дотримуйся цільової калорійності.",
+                "- Збільш кількість білка у раціоні.",
+                "- Додай кардіо для прискорення прогресу.",
+                "- Відстежуй сон і рівень стресу."
+            ];
+            aiComment.textContent = tempComment;
+            recommendationsList.innerHTML = tempRecommendations.map(item => `<li>${item}</li>`).join('');
+
+            aiComment.classList.add('updated');
+            setTimeout(() => {
+                aiComment.classList.remove('updated');
+            }, 1500);
+
+            showToast('✅ Прогноз оновлено!');
+            saveData();
+
+            const question = `Користувач, ${age} років, зріст ${height} см, стать ${gender === 'male' ? 'чоловік' : 'жінка'}, вага ${currentWeight} кг, мета ${targetWeight} кг. Споживає ${currentCalories} ккал, цільова ${targetCalories} ккал, ${workoutsPerWeek} тренувань/тиждень. BMR: ${bmr.toFixed(0)} ккал. Прогноз: ${weeksToTarget} тижні. Напиши прогноз з урахуванням базових метаболічних змін, можливостей плато та мотивації. Також дай 4 рекомендації у форматі списку: "- Рекомендація 1".join('')`;
+            fetch('/ask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Сервер не відповідає');
+                return response.json();
+            })
+            .then(data => {
+                const responseText = data.answer;
+                const [comment, recommendations] = responseText.split('\n\n-');
+                aiComment.textContent = comment.trim();
+                const recItems = recommendations ? recommendations.split('\n-').filter(item => item.trim()).map(item => item.trim()) : [];
+                recommendationsList.innerHTML = recItems.map(item => `<li>${item}</li>`).join('');
+
+                aiComment.classList.add('updated');
+                setTimeout(() => {
+                    aiComment.classList.remove('updated');
+                }, 1500);
+
+                showToast('✅ Прогноз оновлено з AI!');
+                saveData();
+            })
+            .catch(error => {
+                console.error('Помилка запиту до AI:', error);
+            });
+        }
+
+        function renderChart(labels, forecastData, actualData, weeksToTarget) {
+            if (chart) chart.destroy();
+            const targetWeight = targetWeightValue;
+            const currentWeight = forecastData[0];
+            const isWeightLoss = targetWeight < currentWeight;
+            const isWeightGain = targetWeight > currentWeight;
+            const borderColor = isWeightLoss ? 'rgba(0, 255, 0, 1)' : isWeightGain ? 'rgba(0, 0, 255, 1)' : 'rgba(128, 128, 128, 1)';
+            const backgroundColor = isWeightLoss ? 'rgba(0, 255, 0, 0.2)' : isWeightGain ? 'rgba(0, 0, 255, 0.2)' : 'rgba(128, 128, 128, 0.2)';
+
+            const datasets = [
+                {
+                    label: 'Прогноз ваги (кг)',
+                    data: forecastData,
+                    borderColor: borderColor,
+                    backgroundColor: backgroundColor,
+                    fill: true,
+                    tension: 0.3
+                }
+            ];
+
+            if (actualData.length) {
+                datasets.push({
+                    label: 'Фактична вага (кг)',
+                    data: actualData,
+                    borderColor: 'rgba(255, 215, 0, 1)',
+                    backgroundColor: 'rgba(255, 215, 0, 0.2)',
+                    fill: false,
+                    borderDash: [5, 5],
+                    tension: 0.1
+                });
+            }
+
+            const annotations = (targetWeight && typeof window.ChartAnnotation !== 'undefined') ? {
+                targetLine: {
+                    type: 'line',
+                    yMin: targetWeight,
+                    yMax: targetWeight,
+                    borderColor: 'rgba(255, 215, 0, 0.7)',
+                    borderWidth: 2,
+                    borderDash: [5, 5],
+                    label: {
+                        display: true,
+                        content: 'Ціль: ' + targetWeight.toFixed(1) + ' кг',
+                        position: 'start',
+                        backgroundColor: 'rgba(255, 215, 0, 0.8)',
+                        color: '#1A1A1A',
+                        font: { size: 12, weight: 600 },
+                        padding: 6
+                    }
+                },
+                completionPoint: weeksToTarget ? {
+                    type: 'point',
+                    xValue: weeksToTarget,
+                    yValue: targetWeight,
+                    backgroundColor: 'rgba(0, 255, 209, 0.9)',
+                    borderColor: 'rgba(0, 255, 209, 1)',
+                    radius: 6,
+                    label: {
+                        display: true,
+                        content: 'Прогноз завершення',
+                        position: 'top',
+                        backgroundColor: 'rgba(0, 255, 209, 0.8)',
+                        color: '#1A1A1A',
+                        font: { size: 12, weight: 600 },
+                        padding: 6
+                    }
+                } : null
+            } : {};
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Тижні', color: '#A0AEC0' }, ticks: { color: '#A0AEC0' } },
+                        y: { title: { display: true, text: 'Вага (кг)', color: '#A0AEC0' }, ticks: { color: '#A0AEC0' } }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#A0AEC0' } },
+                        tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ${context.raw.toFixed(1)} кг` } },
+                        annotation: {
+                            annotations: annotations
+                        }
+                    }
+                }
+            });
+        }
+
+        document.getElementById('simCal').addEventListener('input', function() {
+            document.getElementById('simCalValue').textContent = this.value;
+            calculateForecast();
+        });
+
+        document.getElementById('simulateExtraWorkout').addEventListener('change', calculateForecast);
+
+        document.getElementById('currentWeight').addEventListener('input', updateProgressBar);
+        document.getElementById('targetWeight').addEventListener('input', calculateForecast);
+
+        window.onload = loadData;
+    </script>
+</body>
+</html>
